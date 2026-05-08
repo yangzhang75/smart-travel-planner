@@ -6,6 +6,7 @@ import SignInPage from "./pages/SignInPage";
 import SignUpPage from "./pages/SignUpPage";
 import HomePage from "./pages/HomePage";
 import ProfilePage from "./pages/ProfilePage";
+import PlanWithAIPage from "./pages/PlanWithAIPage";
 
 // ───── Photo pool for auth pages ─────
 const PHOTOS = [
@@ -47,6 +48,7 @@ function App() {
         <Route path="/home" element={<HomePage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="*" element={<Navigate to="/signin" replace />} />
+        <Route path="/plan" element={<PlanWithAIPage />} />
       </Routes>
     </BrowserRouter>
   );

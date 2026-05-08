@@ -133,7 +133,24 @@ export default function HomePage() {
       setViewMonth(new Date(start.getFullYear(), start.getMonth(), 1));
     }
   };
+  const handlePlanWithAI = () => {
+    setActiveField(null);
 
+    navigate("/plan", {
+      state: {
+        where,
+        dateStart,
+        dateEnd,
+        adults,
+        children,
+        budget,
+        dateLabel: fmtDateRange(dateStart, dateEnd),
+        budgetLabel: fmtBudget(budget),
+        whoLabel,
+      },
+    });
+  };
+  
   return (
     <div className="app">
       <nav className="navbar">
@@ -263,7 +280,7 @@ export default function HomePage() {
             </div>
           </SearchField>
 
-          <button className="planButton" onClick={() => setActiveField(null)}>
+          <button className="planButton" onClick={handlePlanWithAI}>
             <Icon.sparkle />
             Plan with AI
           </button>

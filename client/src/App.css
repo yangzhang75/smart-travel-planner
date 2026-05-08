@@ -1579,3 +1579,424 @@ button, input { font-family: inherit; }
   .profFieldGrid { grid-template-columns: 1fr; }
   .stampsRow { grid-template-columns: repeat(2, 1fr); }
 }
+
+/* ───────── PLAN WITH AI LOADING ───────── */
+
+.aiLoadingPage {
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--ink);
+  padding: 28px 48px;
+  position: relative;
+  font-family: var(--sans);
+}
+
+.loadingLogo {
+  font-family: "Voyage", "DM Sans", serif;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.loadingLogo span {
+  color: var(--accent);
+}
+
+.loadingCenter {
+  max-width: 560px;
+  margin: 90px auto 0;
+  text-align: center;
+}
+
+.loadingCircle {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  margin: 0 auto 28px;
+  background: var(--green-tint);
+  color: var(--accent);
+  font-weight: 700;
+  box-shadow: var(--shadow-search);
+}
+
+.loadingCenter h1 {
+  font-family: "Voyage", "DM Sans", serif;
+  font-size: 34px;
+  font-weight: 600;
+  margin: 0 0 14px;
+  color: var(--ink);
+}
+
+.loadingCenter p {
+  color: var(--muted);
+  margin-bottom: 34px;
+}
+
+.loadingSteps {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  text-align: left;
+}
+
+.loadingStep {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  padding: 14px 16px;
+  border-radius: var(--radius);
+  border: 1px solid transparent;
+  transition: all 0.25s ease;
+}
+
+.loadingStep.active {
+  border-color: var(--rule-strong);
+  box-shadow: var(--shadow-search);
+  background: var(--bg);
+}
+
+.stepDot {
+  width: 22px;
+  height: 22px;
+  border: 1px solid var(--rule-strong);
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 11px;
+  flex-shrink: 0;
+}
+
+.loadingStep.done .stepDot {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+
+.loadingStep strong {
+  font-size: 14px;
+  color: var(--ink);
+}
+
+.loadingStep small {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.loadingBottom {
+  position: absolute;
+  left: 48px;
+  right: 48px;
+  bottom: 28px;
+  text-align: center;
+}
+
+.progressTrack {
+  height: 8px;
+  border-radius: var(--radius-pill);
+  background: var(--rule);
+  overflow: hidden;
+  margin-bottom: 14px;
+}
+
+.progressFill {
+  height: 100%;
+  background: var(--accent);
+  transition: width 0.4s ease;
+}
+
+.loadingBottom button {
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+/* ───────── TRIP DETAIL PAGE ───────── */
+
+.tripDetailPage {
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--sans);
+}
+
+.tripTopbar {
+  height: 72px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--rule);
+  display: flex;
+  align-items: center;
+  padding: 0 32px;
+  gap: 22px;
+}
+
+.tripBrand {
+  font-family: "Voyage", "DM Sans", serif;
+  font-size: 22px;
+  font-weight: 700;
+  padding-right: 22px;
+  border-right: 1px solid var(--rule);
+}
+
+.tripBrand span {
+  color: var(--accent);
+}
+
+.tripTitle {
+  color: var(--muted);
+  flex: 1;
+  font-size: 14px;
+}
+
+.tripActions {
+  display: flex;
+  gap: 10px;
+}
+
+.tripActions button,
+.dayHeader button {
+  border: 1px solid var(--rule-strong);
+  background: var(--bg);
+  color: var(--ink);
+  border-radius: var(--radius-pill);
+  padding: 8px 16px;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.tripActions button:last-child {
+  background: var(--ink);
+  color: white;
+  border-color: var(--ink);
+}
+
+.tripLayout {
+  display: grid;
+  grid-template-columns: 230px 1fr 430px;
+  min-height: calc(100vh - 72px);
+}
+
+.tripSidebar {
+  background: var(--bg-alt);
+  border-right: 1px solid var(--rule);
+}
+
+.sidebarLabel {
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 1px;
+  padding: 18px 22px;
+  margin: 0;
+}
+
+.dayItem {
+  width: 100%;
+  border: none;
+  border-bottom: 1px solid var(--rule);
+  background: transparent;
+  padding: 15px 22px;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.dayItem.active {
+  background: var(--bg);
+}
+
+.dayItem strong {
+  color: var(--ink);
+}
+
+.dayItem span,
+.dayItem small {
+  color: var(--muted);
+}
+
+.addDay {
+  margin: 18px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.tripMain {
+  padding: 32px;
+  background: #f7f7f7;
+}
+
+.dayHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--rule-strong);
+  padding-bottom: 22px;
+}
+
+.dayHeader h1 {
+  margin: 0;
+  font-family: "Voyage", "DM Sans", serif;
+  font-size: 30px;
+  font-weight: 600;
+}
+
+.dayHeader p {
+  color: var(--muted);
+  margin: 6px 0 0;
+}
+
+.stopList {
+  margin-top: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.stopCard {
+  display: grid;
+  grid-template-columns: 24px 80px 1fr auto;
+  gap: 16px;
+  background: var(--bg);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  padding: 18px;
+  align-items: start;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+}
+
+.dragDots {
+  color: var(--rule-strong);
+  font-size: 22px;
+}
+
+.stopTime {
+  border-right: 1px solid var(--rule);
+}
+
+.stopTime span {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  margin-top: 6px;
+}
+
+.stopInfo h3 {
+  margin: 0 0 4px;
+  font-size: 15px;
+}
+
+.stopInfo p {
+  margin: 4px 0;
+  color: var(--ink-soft);
+  font-size: 13px;
+}
+
+.stopType {
+  color: var(--muted) !important;
+}
+
+.stopCost {
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius-pill);
+  padding: 5px 12px;
+  color: var(--ink-soft);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.tripRightPanel {
+  background: var(--bg);
+  border-left: 1px solid var(--rule);
+  padding: 30px 24px;
+}
+
+.tabs {
+  display: flex;
+  justify-content: space-around;
+  border-bottom: 1px solid var(--rule);
+  margin-bottom: 14px;
+}
+
+.tabs button {
+  border: none;
+  background: transparent;
+  padding: 12px;
+  color: var(--muted);
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.tabs .active {
+  color: var(--ink);
+  border-bottom: 2px solid var(--ink);
+}
+
+.mapBox {
+  height: 150px;
+  background: var(--bg-alt);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+  margin-bottom: 24px;
+}
+
+.weatherRow {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  text-align: center;
+  color: var(--ink-soft);
+  font-size: 12px;
+  border-bottom: 1px solid var(--rule);
+  padding-bottom: 20px;
+}
+
+.weatherRow span {
+  display: block;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+.weatherIcon {
+  width: 22px;
+  height: 22px;
+  background: var(--green-tint);
+  margin: 0 auto 6px;
+  border-radius: 6px;
+}
+
+.budgetBox {
+  margin-top: 18px;
+  font-size: 13px;
+}
+
+.budgetBox div {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.budgetTrack {
+  height: 6px;
+  background: var(--rule);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+}
+
+.budgetFill {
+  height: 100%;
+  width: 55%;
+  background: var(--accent);
+}
+
+.budgetBox small {
+  color: var(--muted);
+}

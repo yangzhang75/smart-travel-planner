@@ -1,131 +1,54 @@
+import { useState } from "react";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import "./App.css";
 
-function StatCard({ icon, number, label, accent }) {
-  return (
-    <article className={`statCard ${accent}`}>
-      <div className="statIcon">{icon}</div>
-      <strong>{number}</strong>
-      <span>{label}</span>
-    </article>
-  );
-}
+import SignInPage from "./pages/SignInPage";
+import SignUpPage from "./pages/SignUpPage";
+import HomePage from "./pages/HomePage";
+import ProfilePage from "./pages/ProfilePage";
 
-function SearchField({ icon, label, value }) {
-  return (
-    <div className="searchField">
-      <div className="fieldIcon">{icon}</div>
-      <div>
-        <p>{label}</p>
-        <span>{value}</span>
-      </div>
-    </div>
-  );
+// ───── Photo pool for auth pages ─────
+const PHOTOS = [
+  "https://images.unsplash.com/photo-1533105079780-92b9be482077?w=1600&q=80&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1600&q=80&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?w=1600&q=80&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1473580044384-7ba9967e16a0?w=1600&q=80&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1506953823976-52e1fdc0149a?w=1600&q=80&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1499678329028-101435549a4e?w=1600&q=80&auto=format&fit=crop",
+];
+
+function pickIndex(excluded) {
+  const pool = PHOTOS.map((_, i) => i).filter((i) => !excluded.includes(i));
+  return pool[Math.floor(Math.random() * pool.length)];
 }
 
 function App() {
+  const [slide, setSlide] = useState(0);
+  const [photos, setPhotos] = useState(() => {
+    const a = pickIndex([]);
+    const b = pickIndex([a]);
+    return { signin: a, signup: b };
+  });
+
+  // Reroll photo when navigating between auth pages
+  const rerollPhoto = (page) => {
+    setPhotos((prev) => {
+      const other = page === "signin" ? prev.signup : prev.signin;
+      const fresh = pickIndex([prev[page], other]);
+      return { ...prev, [page]: fresh };
+    });
+  };
+
   return (
-    <div className="app">
-      <nav className="navbar">
-        <div className="logo">
-          voyage<span>.ai</span>
-        </div>
-
-        <div className="navLinks">
-          <a href="#explore">Explore</a>
-          <a href="#my-trips">My Trips</a>
-          <button className="bellButton" aria-label="notifications">
-            🔔
-          </button>
-          <div className="avatarBlank" aria-label="user profile"></div>
-        </div>
-      </nav>
-
-      <main className="dashboard">
-        <section className="topRow">
-          <div className="welcomeCard">
-            <div className="heroArt"></div>
-            <div className="welcomeText">
-              <h1>Welcome Back, Yoyo!</h1>
-              <p>Ready to plan your next adventure?</p>
-            </div>
-          </div>
-
-          <div className="statsGrid">
-          <StatCard icon="🎒" number="3" label="Trips" accent="green" />
-          <StatCard icon="🌍" number="2" label="Countries" accent="green" />
-          <StatCard icon="📅" number="12" label="Days" accent="green" />
-          <StatCard icon="💳" number="$3,000" label="Total Budget" accent="gold" />
-          </div>
-        </section>
-
-        <section className="quickPlan" aria-label="4W trip search">
-        <SearchField icon="📍" label="WHERE" value="Search destinations" />
-        <SearchField icon="📅" label="WHEN" value="Add dates" />
-        <SearchField icon="👥" label="WHO" value="Travelers" />
-        <SearchField icon="💳" label="WALLET" value="Budget" />
-
-          <button className="planButton">✦ Plan with AI</button>
-        </section>
-
-        <section className="sectionBlock">
-          <div className="sectionHeader">
-            <h2>🛫 Coming Up</h2>
-          </div>
-
-          <article className="comingCard">
-            <div className="tripImage tokyoImage"></div>
-
-            <div className="comingInfo">
-              <p className="smallGold">Next Trip</p>
-              <h3>Tokyo, Japan</h3>
-
-              <div className="tripMeta">
-              <span>📅 May 20 – May 25</span>
-              <span>👥 2 travelers</span>
-              <span>💳 $1500 budget</span>
-              </div>
-            </div>
-
-            <button className="outlineButton">View Itinerary</button>
-          </article>
-        </section>
-
-        <section className="sectionBlock" id="my-trips">
-          <div className="sectionHeader">
-            <h2>🧳 My Trips</h2>
-            <a href="#my-trips">View all trips ›</a>
-          </div>
-
-          <div className="tripGrid">
-            <article className="tripCard">
-              <div className="cardImage parisImage">
-                <span>Upcoming</span>
-              </div>
-              <div className="tripCardBody">
-                <h3>Paris Weekend</h3>
-                <p>📍 France · 3 days</p>
-              </div>
-            </article>
-
-            <article className="tripCard">
-              <div className="cardImage seoulImage">
-                <span>Upcoming</span>
-              </div>
-              <div className="tripCardBody">
-                <h3>Seoul Food Tour</h3>
-                <p>📍 Korea · 5 days</p>
-              </div>
-            </article>
-
-            <article className="newTripCard">
-              <div className="plusCircle">+</div>
-              <h3>Start a new trip</h3>
-              <p>Let AI help you plan your next adventure</p>
-            </article>
-          </div>
-        </section>
-      </main>
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/signin" element={<SignInPage slide={slide} setSlide={setSlide} photo={PHOTOS[photos.signin]} onNavigate={() => rerollPhoto("signup")} />} />
+        <Route path="/signup" element={<SignUpPage slide={slide} setSlide={setSlide} photo={PHOTOS[photos.signup]} onNavigate={() => rerollPhoto("signin")} />} />
+        <Route path="/home" element={<HomePage />} />
+        <Route path="/profile" element={<ProfilePage />} />
+        <Route path="*" element={<Navigate to="/signin" replace />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 

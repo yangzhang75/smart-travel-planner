@@ -103,7 +103,7 @@ function App() {
               </div>
               <div className="tripCardBody">
                 <h3>Paris Weekend</h3>
-                <p>⌖ France · 3 days</p>
+                <p>📍 France · 3 days</p>
               </div>
             </article>
 
@@ -113,7 +113,7 @@ function App() {
               </div>
               <div className="tripCardBody">
                 <h3>Seoul Food Tour</h3>
-                <p>⌖ Korea · 5 days</p>
+                <p>📍 Korea · 5 days</p>
               </div>
             </article>
 

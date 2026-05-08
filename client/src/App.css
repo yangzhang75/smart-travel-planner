@@ -1,0 +1,323 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: #f4f4f4;
+  font-family: Arial, Helvetica, sans-serif;
+  color: #1f1f1f;
+}
+
+button,
+input {
+  font-family: inherit;
+}
+
+.app {
+  min-height: 100vh;
+  background: #f4f4f4;
+}
+
+.topBar {
+  width: 100%;
+  background: white;
+  border-bottom: 1px solid #d8d8d8;
+  padding: 18px 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.logoBox {
+  background: #e5e5e5;
+  padding: 14px 28px;
+  border-radius: 8px;
+  font-weight: 700;
+}
+
+.navLinks {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.navLinks a {
+  color: #222;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.iconButton {
+  border: none;
+  background: #e5e5e5;
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  cursor: pointer;
+}
+
+.homepage {
+  max-width: 1100px;
+  margin: 0 auto;
+  background: white;
+  min-height: 100vh;
+  padding: 28px;
+}
+
+.welcomeSection {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 28px;
+  align-items: center;
+  margin-bottom: 26px;
+}
+
+.welcomeText {
+  background: #d9d9d9;
+  padding: 24px;
+  border-radius: 14px;
+}
+
+.welcomeText h1 {
+  margin: 0 0 10px;
+  font-size: 36px;
+}
+
+.welcomeText p {
+  margin: 0;
+  background: #efefef;
+  display: inline-block;
+  padding: 8px 14px;
+  border-radius: 4px;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+}
+
+.statCard {
+  background: #d9d9d9;
+  border-radius: 14px;
+  padding: 20px 12px;
+  text-align: center;
+}
+
+.statCard strong {
+  display: block;
+  font-size: 32px;
+}
+
+.statCard span {
+  font-size: 13px;
+  color: #555;
+}
+
+.searchSection {
+  background: #f1f1f1;
+  padding: 18px;
+  border-radius: 14px;
+  margin-bottom: 32px;
+}
+
+.searchBox {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr) 80px;
+  gap: 14px;
+  align-items: center;
+}
+
+.searchBox label {
+  background: #d9d9d9;
+  border-radius: 12px;
+  padding: 14px;
+  display: grid;
+  gap: 4px;
+}
+
+.searchBox span {
+  font-weight: 800;
+  font-size: 16px;
+}
+
+.searchBox input {
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 14px;
+}
+
+.searchButton {
+  height: 70px;
+  border: none;
+  border-radius: 12px;
+  background: #d9d9d9;
+  font-size: 30px;
+  cursor: pointer;
+}
+
+.comingUp {
+  border-top: 1px solid #ddd;
+  padding-top: 16px;
+  margin-bottom: 34px;
+}
+
+.comingUp h2,
+.myTrips h2 {
+  display: inline-block;
+  background: #e2e2e2;
+  padding: 6px 22px;
+  font-size: 16px;
+  margin: 0 0 14px;
+}
+
+.upcomingTrip {
+  min-height: 150px;
+  background: #eeeeee;
+  border-radius: 8px;
+  padding: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  position: relative;
+  overflow: hidden;
+}
+
+.upcomingTrip::before,
+.upcomingTrip::after {
+  content: "";
+  position: absolute;
+  width: 130%;
+  height: 1px;
+  background: #c9c9c9;
+  left: -10%;
+  top: 50%;
+}
+
+.upcomingTrip::before {
+  transform: rotate(7deg);
+}
+
+.upcomingTrip::after {
+  transform: rotate(-7deg);
+}
+
+.upcomingTrip > * {
+  position: relative;
+  z-index: 1;
+}
+
+.tripLabel {
+  margin: 0 0 8px;
+  font-weight: 700;
+  color: #555;
+}
+
+.upcomingTrip h3 {
+  margin: 0 0 8px;
+  font-size: 28px;
+}
+
+.upcomingTrip p {
+  margin: 0;
+}
+
+.viewButton {
+  background: #d0d0d0;
+  border: none;
+  padding: 14px 24px;
+  font-size: 18px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.tripGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+}
+
+.tripCard,
+.newTripCard {
+  background: #d9d9d9;
+  border-radius: 14px;
+  overflow: hidden;
+  min-height: 150px;
+}
+
+.imagePlaceholder {
+  height: 80px;
+  background: #cfcfcf;
+  display: grid;
+  place-items: center;
+  font-size: 13px;
+}
+
+.tripCard h3,
+.tripCard p {
+  margin-left: 18px;
+  margin-right: 18px;
+}
+
+.tripCard h3 {
+  margin-bottom: 4px;
+}
+
+.tripCard p {
+  margin-top: 0;
+  color: #555;
+}
+
+.newTripCard {
+  border: 2px solid #999;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  padding: 24px;
+}
+
+.plusCircle {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #c5c5c5;
+  display: grid;
+  place-items: center;
+  font-size: 24px;
+  margin-bottom: 8px;
+}
+
+.newTripCard h3 {
+  margin: 0;
+  color: #666;
+  font-size: 16px;
+}
+
+@media (max-width: 850px) {
+  .topBar {
+    padding: 16px 20px;
+  }
+
+  .welcomeSection {
+    grid-template-columns: 1fr;
+  }
+
+  .searchBox {
+    grid-template-columns: 1fr;
+  }
+
+  .searchButton {
+    height: 58px;
+  }
+
+  .upcomingTrip {
+    display: grid;
+    gap: 20px;
+  }
+
+  .tripGrid {
+    grid-template-columns: 1fr;
+  }
+}

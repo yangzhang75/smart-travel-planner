@@ -1,0 +1,353 @@
+/* ───────── ABOUT PAGE ───────── */
+.aboutPage {
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--sans);
+  display: flex;
+  flex-direction: column;
+  animation: fadeUp 0.5s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+
+/* ── Top nav ── */
+.aboutNav {
+  height: 72px;
+  padding: 0 48px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--rule);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+.aboutNav .logo {
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: "Voyage", "DM Sans", serif;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  color: var(--ink);
+  cursor: pointer;
+}
+.aboutNav .logo span { color: var(--accent); font-weight: 700; }
+
+.aboutNavLinks {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.aboutNavLink {
+  background: transparent;
+  border: none;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink);
+  padding: 8px 14px;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+.aboutNavLink:hover { background: var(--bg-alt); }
+.aboutNavLink.active { color: var(--accent); }
+
+.aboutCta {
+  margin-left: 8px;
+  border: none;
+  background: var(--accent);
+  color: #fff;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 10px 22px;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+.aboutCta:hover { background: var(--accent-hover); }
+.aboutCta:active { transform: scale(0.98); }
+
+/* ── Hero ── */
+.aboutHero {
+  background: var(--bg-alt);
+  padding: 96px 48px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 20px;
+}
+.aboutHeroTitle {
+  margin: 0;
+  font-family: "Voyage", "DM Sans", serif;
+  font-size: 48px;
+  font-weight: 700;
+  letter-spacing: -1px;
+  color: var(--ink);
+  line-height: 1.1;
+  max-width: 720px;
+}
+.aboutHeroBrand em { font-style: normal; color: var(--accent); }
+.aboutHeroSub {
+  margin: 0;
+  font-size: 17px;
+  line-height: 1.6;
+  color: var(--muted);
+  max-width: 560px;
+}
+
+/* ── Mission ── */
+.aboutMission {
+  background: var(--bg);
+  padding: 80px 48px;
+  display: flex;
+  justify-content: center;
+}
+.missionCard {
+  max-width: 720px;
+  width: 100%;
+  padding: 48px;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--bg);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+}
+.missionTitle {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.3px;
+  color: var(--ink);
+}
+.missionDivider {
+  display: block;
+  width: 40px;
+  height: 2px;
+  background: var(--accent);
+  border-radius: 2px;
+}
+.missionBody {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--ink-soft);
+  max-width: 560px;
+}
+
+/* ── What we offer ── */
+.aboutOffer {
+  background: var(--bg-alt);
+  padding: 80px 48px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 36px;
+}
+.aboutSectionTitle {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: -0.4px;
+  color: var(--ink);
+  text-align: center;
+}
+.offerGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  width: 100%;
+  max-width: 1000px;
+}
+.offerCard {
+  background: var(--bg);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.offerCard:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-search);
+  border-color: var(--rule-strong);
+}
+.offerIconWrap {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--green-tint);
+  color: var(--accent);
+  display: grid;
+  place-items: center;
+  margin-bottom: 4px;
+}
+.offerIconWrap svg { width: 20px; height: 20px; }
+.offerTitle {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.2px;
+  color: var(--ink);
+}
+.offerDesc {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+/* ── Stats strip ── */
+.aboutStats {
+  background: var(--bg);
+  padding: 64px 48px;
+}
+.statsRow {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+.statCol {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 8px;
+}
+.statValue {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: -0.4px;
+  line-height: 1.1;
+}
+.statLabel {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* ── Final CTA ── */
+.aboutCtaSection {
+  background: var(--bg-alt);
+  padding: 96px 48px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  text-align: center;
+}
+.aboutCtaTitle {
+  margin: 0;
+  font-size: 32px;
+  font-weight: 600;
+  letter-spacing: -0.5px;
+  color: var(--ink);
+}
+.aboutCtaSub {
+  margin: 0 0 16px;
+  font-size: 15px;
+  color: var(--muted);
+}
+.aboutCtaBig {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: none;
+  background: var(--accent);
+  color: #fff;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  padding: 14px 32px;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+.aboutCtaBig:hover { background: var(--accent-hover); }
+.aboutCtaBig:active { transform: scale(0.98); }
+.aboutCtaBig svg { width: 16px; height: 16px; }
+
+/* ── Footer ── */
+.aboutFooter {
+  border-top: 1px solid var(--rule);
+  padding: 32px 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  background: var(--bg);
+}
+.aboutCopy {
+  font-size: 13px;
+  color: var(--muted);
+}
+.aboutFootLinks {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+.aboutFootLink {
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink);
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+.aboutFootLink:hover { color: var(--accent); }
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .aboutNav { padding: 0 20px; }
+  .aboutNavLink { padding: 8px 10px; }
+  .aboutCta { padding: 9px 16px; }
+
+  .aboutHero { padding: 64px 24px; }
+  .aboutHeroTitle { font-size: 36px; letter-spacing: -0.6px; }
+  .aboutHeroSub { font-size: 15px; }
+
+  .aboutMission { padding: 56px 20px; }
+  .missionCard { padding: 32px 24px; }
+  .missionTitle { font-size: 22px; }
+
+  .aboutOffer { padding: 56px 20px; gap: 28px; }
+  .aboutSectionTitle { font-size: 24px; }
+  .offerGrid { grid-template-columns: 1fr; gap: 16px; }
+  .offerCard { padding: 24px; }
+
+  .aboutStats { padding: 48px 20px; }
+  .statsRow { grid-template-columns: repeat(2, 1fr); gap: 28px 16px; }
+  .statValue { font-size: 22px; }
+
+  .aboutCtaSection { padding: 64px 24px; }
+  .aboutCtaTitle { font-size: 26px; }
+
+  .aboutFooter {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 24px 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .aboutNavLink:not(.active) { display: none; }
+}

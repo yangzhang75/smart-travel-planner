@@ -1,0 +1,1032 @@
+/* ───────── PROFILE PAGE ───────── */
+.profilePage {
+  background: var(--bg);
+  min-height: 100vh;
+}
+
+.profilePageMain {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+  padding: 0 0 80px;
+  background: var(--bg);
+}
+
+/* Stagger the new sections + the existing profile shell */
+.profilePageMain > * {
+  animation: fadeUp 0.5s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+.profilePageMain > *:nth-child(1) { animation-delay: 0.00s; }
+.profilePageMain > *:nth-child(2) { animation-delay: 0.06s; }
+.profilePageMain > *:nth-child(3) { animation-delay: 0.12s; }
+.profilePageMain > *:nth-child(4) { animation-delay: 0.18s; }
+
+/* ───── Hero (above the shell, full width) ───── */
+.profileHero {
+  background: var(--bg-alt);
+  border-bottom: 1px solid var(--rule);
+  padding: 56px 48px;
+  display: flex;
+  align-items: center;
+  gap: 36px;
+}
+.profHeroLeft {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.profHeroAvatar {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--green-deep));
+  color: #fff;
+  font-family: "Voyage", "DM Sans", serif;
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 8px 24px rgba(47, 111, 78, 0.18);
+}
+.profHeroPhotoBtn {
+  background: transparent;
+  border: none;
+  padding: 4px 8px;
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent);
+  cursor: pointer;
+  border-radius: var(--radius-pill);
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.profHeroPhotoBtn:hover { background: var(--green-tint); color: var(--accent-hover); }
+.profHeroPhotoBtn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.profHeroCenter {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.profHeroName {
+  margin: 0;
+  font-family: "Voyage", "DM Sans", serif;
+  font-size: 36px;
+  font-weight: 700;
+  letter-spacing: -0.6px;
+  color: var(--ink);
+  line-height: 1.1;
+}
+.profHeroTagline {
+  margin: 0;
+  font-size: 15px;
+  color: var(--ink-soft);
+  font-style: italic;
+}
+.profHeroMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 4px;
+  font-size: 13px;
+  color: var(--muted);
+}
+.profHeroMeta span { display: inline-flex; align-items: center; gap: 6px; }
+
+.profHeroRight { flex-shrink: 0; }
+.profEditBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 22px;
+  border: 1px solid var(--ink);
+  border-radius: var(--radius-pill);
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.18s ease;
+}
+.profEditBtn:hover { background: var(--ink); color: #fff; }
+.profEditBtn:active { transform: scale(0.98); }
+.profEditBtn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* ───── Stats strip ───── */
+.profStatsStrip {
+  max-width: 1280px;
+  margin: 0 auto;
+  width: calc(100% - 96px);
+  padding: 32px;
+  background: var(--bg);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  box-sizing: border-box;
+}
+.profStatCell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 6px;
+  padding: 12px 8px;
+  border-radius: var(--radius);
+  cursor: default;
+  transition: background 0.2s ease;
+}
+.profStatCell:hover { background: var(--bg-alt); }
+.profStatIcon {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  color: var(--accent);
+  margin-bottom: 4px;
+}
+.profStatIcon svg { width: 22px; height: 22px; stroke-width: 1.6; }
+.profStatValue {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: -0.5px;
+  line-height: 1;
+  transition: transform 0.2s ease;
+}
+.profStatCell:hover .profStatValue { transform: scale(1.04); }
+.profStatLabel {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* ───── Hero favorites wrapper (above shell) ───── */
+.favPlaces {
+  max-width: 1280px;
+  margin: 0 auto;
+  width: calc(100% - 96px);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  box-sizing: border-box;
+}
+.favPlacesHead { display: flex; flex-direction: column; gap: 4px; }
+.favPlacesTitle {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.3px;
+  color: var(--ink);
+}
+.favPlacesSub {
+  margin: 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+/* Hero favorites grid is 4-up — overrides the 2-col default below. */
+.profilePage .favPlaces .favPlacesGrid {
+  grid-template-columns: repeat(4, 1fr) !important;
+}
+
+/* ─────────────────────────────────────────
+   THE SHELL — locked grid, no drift.
+   240px sidebar + 880px content, both FIXED.
+   Total grid block = 240 + 64 + 880 = 1184px,
+   centered via justify-content: center.
+   ───────────────────────────────────────── */
+.profilePage .profileShell {
+  display: grid !important;
+  grid-template-columns: 240px 880px !important;
+  gap: 64px !important;
+  justify-content: center !important;
+  align-items: start !important;
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 48px 32px 96px !important;
+  box-sizing: border-box !important;
+}
+.profilePageMain .profileShell { margin-top: 8px; }
+
+/* Sidebar — locked to col 1 */
+.profilePage .profileNav {
+  grid-column: 1 !important;
+  position: sticky !important;
+  top: 96px !important;
+  width: 240px !important;
+  max-width: 240px !important;
+  min-width: 240px !important;
+  align-self: start !important;
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 4px !important;
+}
+.profilePage .profileNav h1 {
+  font-family: "Voyage", "DM Sans", serif !important;
+  font-size: 30px !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.5px !important;
+  color: var(--ink) !important;
+  margin: 0 0 24px 4px !important;
+}
+.profilePage .navItem {
+  width: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  padding: 12px 16px !important;
+  margin: 0 !important;
+  border: none !important;
+  border-radius: var(--radius-sm) !important;
+  background: transparent !important;
+  color: var(--ink-soft) !important;
+  font-family: inherit !important;
+  font-size: 15px !important;
+  font-weight: 500 !important;
+  text-align: left !important;
+  cursor: pointer !important;
+  transition: background 0.15s ease, color 0.15s ease !important;
+}
+.profilePage .navItem:hover { background: var(--bg-alt) !important; color: var(--ink) !important; }
+.profilePage .navItem:focus-visible {
+  outline: 2px solid var(--accent) !important;
+  outline-offset: 2px !important;
+}
+.profilePage .navItem.active {
+  background: var(--bg-alt) !important;
+  color: var(--ink) !important;
+  font-weight: 600 !important;
+}
+.profilePage .navItem .navIcon {
+  color: inherit !important;
+  width: 22px !important;
+  height: 22px !important;
+  display: grid !important;
+  place-items: center !important;
+  flex-shrink: 0 !important;
+}
+.profilePage .navItem .navIcon svg { width: 18px; height: 18px; }
+
+/* Content panel — locked to col 2, ALWAYS 880px wide */
+.profilePage .contentPanel {
+  grid-column: 2 !important;
+  width: 880px !important;
+  max-width: 880px !important;
+  min-width: 880px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 24px !important;
+  box-sizing: border-box !important;
+}
+
+/* Force every direct child of contentPanel to obey full width */
+.profilePage .contentPanel > * {
+  width: 100% !important;
+  max-width: none !important;
+  box-sizing: border-box !important;
+}
+
+/* Panel head consistent across tabs */
+.profilePage .panelHead {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+.profilePage .panelTitle {
+  font-family: "Voyage", "DM Sans", serif !important;
+  font-size: 36px !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.6px !important;
+  color: var(--ink) !important;
+  margin: 0 !important;
+}
+.profilePage .vsSub {
+  font-size: 15px !important;
+  color: var(--muted) !important;
+  margin: 0 0 8px 0 !important;
+}
+
+/* ─────────────────────────────────────────
+   FAVORITE PLACES — shared card structure
+   (used by hero AND Saved Places panel)
+   ───────────────────────────────────────── */
+.profilePage .favPlacesGrid {
+  display: grid !important;
+  grid-template-columns: repeat(2, 1fr) !important;
+  gap: 24px !important;
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+.profilePage .favCard {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 12px !important;
+  cursor: pointer !important;
+  width: 100% !important;
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+}
+.profilePage .favCard:focus-visible {
+  outline: 2px solid var(--accent) !important;
+  outline-offset: 4px !important;
+  border-radius: var(--radius);
+}
+.profilePage .favCardImageWrap {
+  position: relative !important;
+  width: 100% !important;
+  aspect-ratio: 16 / 10 !important;
+  border-radius: var(--radius) !important;
+  overflow: hidden !important;
+  background: var(--bg-alt) !important;
+}
+.profilePage .favCardImageWrap img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  display: block !important;
+  transition: transform 0.6s cubic-bezier(0.22,0.61,0.36,1) !important;
+}
+.profilePage .favCard:hover .favCardImageWrap img { transform: scale(1.04) !important; }
+.profilePage .favHeartBtn {
+  position: absolute !important;
+  top: 12px !important; right: 12px !important;
+  width: 36px !important; height: 36px !important;
+  border-radius: 50% !important;
+  background: var(--bg) !important;
+  border: none !important;
+  display: grid !important; place-items: center !important;
+  cursor: pointer !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.12) !important;
+  transition: transform 0.18s ease, box-shadow 0.18s ease !important;
+}
+.profilePage .favHeartBtn:hover {
+  transform: scale(1.06) !important;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.16) !important;
+}
+.profilePage .favHeartBtn:focus-visible { outline: 2px solid var(--accent) !important; outline-offset: 2px !important; }
+.profilePage .favHeartBtn svg {
+  width: 18px;
+  height: 18px;
+  transition: transform 0.18s ease;
+}
+.profilePage .favHeartBtn.popping svg { animation: heartPop 0.26s ease; }
+@keyframes heartPop {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.25); }
+  100% { transform: scale(1); }
+}
+.profilePage .favCardBody {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 4px !important;
+}
+.profilePage .favCardName {
+  font-size: 18px !important;
+  font-weight: 600 !important;
+  color: var(--ink) !important;
+  margin: 0 !important;
+}
+.profilePage .favCardCountry {
+  font-size: 14px !important;
+  color: var(--muted) !important;
+  margin: 0 !important;
+}
+
+/* ─────────────────────────────────────────
+   PAST TRIPS — full-width card list
+   ───────────────────────────────────────── */
+.profilePage .tripList {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 12px !important;
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+.profilePage .tripRow {
+  display: flex !important;
+  align-items: center !important;
+  gap: 16px !important;
+  width: 100% !important;
+  padding: 14px 16px !important;
+  background: var(--bg) !important;
+  border: 1px solid var(--rule) !important;
+  border-radius: var(--radius) !important;
+  cursor: pointer !important;
+  transition: border-color 0.18s ease, background 0.18s ease !important;
+  box-sizing: border-box !important;
+}
+.profilePage .tripRow:hover {
+  border-color: var(--rule-strong) !important;
+  background: var(--bg-alt) !important;
+}
+.profilePage .tripRow:focus-visible {
+  outline: 2px solid var(--accent) !important;
+  outline-offset: 2px !important;
+}
+.profilePage .tripRow .tripThumb {
+  transition: transform 0.4s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+.profilePage .tripRow:hover .tripThumb { transform: scale(1.04); }
+
+/* ─────────────────────────────────────────
+   PILLS — interests + preferences
+   ───────────────────────────────────────── */
+.profilePage .profPills {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 10px !important;
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+.profilePage .profPill {
+  padding: 9px 18px !important;
+  border-radius: var(--radius-pill) !important;
+  border: 1px solid var(--rule-strong) !important;
+  background: var(--bg) !important;
+  color: var(--ink) !important;
+  font-family: inherit !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+}
+.profilePage .profPill:hover {
+  background: var(--bg-alt) !important;
+  border-color: var(--ink-soft) !important;
+}
+.profilePage .profPill.on {
+  background: var(--accent) !important;
+  border-color: var(--accent) !important;
+  color: #fff !important;
+}
+
+.profilePage .prefGroup {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 12px !important;
+  margin-bottom: 24px !important;
+  width: 100% !important;
+}
+.profilePage .prefGroupLabel {
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  color: var(--ink) !important;
+  margin: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+/* ─────────────────────────────────────────
+   STATS / STAMPS / SECTIONS — full width
+   ───────────────────────────────────────── */
+.profilePage .profStatsStrip,
+.profilePage .stampsRow,
+.profilePage .profSection,
+.profilePage .profFieldGrid,
+.profilePage .completeBox,
+.profilePage .tagWrap,
+.profilePage .aboutBox {
+  width: 100% !important;
+  max-width: none !important;
+  box-sizing: border-box !important;
+}
+
+.profilePage .profFieldGrid {
+  display: grid !important;
+  grid-template-columns: repeat(2, 1fr) !important;
+  gap: 12px !important;
+}
+
+.profilePage .stampsRow {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 16px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* ─────────────────────────────────────────
+   ABOUT VIEW — identity card + about-me + details
+   ───────────────────────────────────────── */
+.identityCard {
+  background: var(--bg-alt);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  padding: 32px 36px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  width: 100%;
+  box-sizing: border-box;
+}
+.identityAvatar {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--green-deep));
+  color: #fff;
+  font-family: "Voyage", "DM Sans", serif;
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 8px 24px rgba(47, 111, 78, 0.18);
+  flex-shrink: 0;
+}
+.identityBody {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.identityName {
+  margin: 0;
+  font-family: "Voyage", "DM Sans", serif;
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  color: var(--ink);
+  line-height: 1.1;
+}
+.identityBadges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.idBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  background: var(--bg);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-pill);
+  font-size: 12px;
+  color: var(--ink-soft);
+  white-space: nowrap;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.identityEditBtn {
+  flex-shrink: 0;
+  align-self: center;
+}
+
+/* About-me text block */
+.aboutMeBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.aboutMeLabel {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+}
+.aboutMeCard {
+  background: var(--bg);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  padding: 24px 28px;
+  transition: border-color 0.18s ease;
+}
+.aboutMeCard:hover { border-color: var(--rule-strong); }
+.aboutMeText {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--ink);
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+.aboutMeEmpty {
+  border: 1px dashed var(--rule-strong);
+  border-radius: var(--radius);
+  padding: 24px;
+  text-align: center;
+  color: var(--muted);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+.aboutMeEmpty p { margin: 0; font-size: 14px; }
+
+/* Profile details grid */
+.detailsBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.detailsHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.detailsTitle {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.2px;
+  color: var(--ink);
+}
+.detailsEditLink {
+  background: none;
+  border: none;
+  padding: 4px 8px;
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent);
+  cursor: pointer;
+  border-radius: var(--radius-pill);
+  transition: background 0.15s ease, color 0.15s ease, text-decoration-color 0.15s ease;
+  text-decoration: underline transparent;
+  text-underline-offset: 3px;
+}
+.detailsEditLink:hover {
+  text-decoration-color: var(--accent);
+  color: var(--accent-hover);
+}
+.detailsEditLink:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.detailsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+.detailRow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  background: var(--bg);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-sm);
+  transition: border-color 0.18s ease;
+}
+.detailRow:hover { border-color: var(--rule-strong); }
+.detailIcon {
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+.detailIcon svg { width: 20px; height: 20px; }
+.detailBody {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.detailLabel {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+.detailValue {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--ink);
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+.detailsEmpty {
+  border: 1px dashed var(--rule-strong);
+  border-radius: var(--radius);
+  padding: 24px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+.detailsEmpty p { margin: 0; font-size: 14px; color: var(--muted); }
+
+/* Empty-state CTA button */
+.addCtaBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: var(--ink);
+  color: #fff;
+  border: 1px solid var(--ink);
+  border-radius: var(--radius-pill);
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.18s ease, transform 0.15s ease;
+}
+.addCtaBtn:hover { background: #000; }
+.addCtaBtn:active { transform: scale(0.98); }
+.addCtaBtn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.addCtaBtn svg { width: 14px; height: 14px; }
+
+.emptyTagsRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* Travel preferences read-only summary */
+.prefSummaryRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.prefSummaryPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  background: var(--bg-alt);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-pill);
+  font-size: 13px;
+}
+.prefSummaryLabel { color: var(--muted); font-weight: 500; }
+.prefSummaryValue { color: var(--ink); font-weight: 600; }
+
+/* Empty panel */
+.emptyPanel {
+  margin-top: 12px;
+  padding: 32px 24px;
+  border: 1px dashed var(--rule-strong);
+  border-radius: var(--radius);
+  text-align: center;
+  color: var(--muted);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+.emptyPanel p { margin: 0; font-size: 14px; }
+
+/* Hint line above interests pills */
+.hintLine {
+  margin: 0;
+  font-size: 13px;
+  color: var(--accent);
+  background: var(--green-tint);
+  padding: 8px 14px;
+  border-radius: var(--radius-sm);
+  display: inline-flex;
+  align-self: flex-start;
+}
+
+/* ─────────────────────────────────────────
+   EDIT view — input rows + textarea polish
+   ───────────────────────────────────────── */
+.profilePageMain .aboutBox {
+  background: var(--bg);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  min-height: 120px;
+  display: flex;
+  align-items: stretch;
+  justify-content: flex-start;
+  text-align: left;
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.55;
+  cursor: text;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+}
+.profilePageMain .aboutBox:hover {
+  border-color: var(--rule-strong);
+  background: var(--bg);
+}
+.profilePageMain .aboutBox:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(47, 111, 78, 0.12);
+}
+.profilePageMain .aboutBox.filled {
+  background: var(--bg-alt);
+  border-color: var(--rule);
+  color: var(--ink);
+}
+.profilePageMain .aboutBox textarea {
+  width: 100%;
+  min-height: 96px;
+  max-height: 360px;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--ink);
+  resize: vertical;
+  padding: 0;
+}
+.profilePageMain .aboutBox textarea::placeholder { color: var(--muted); }
+
+.profilePageMain .profField {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: var(--bg-alt);
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+}
+.profilePageMain .profField:hover {
+  background: var(--bg-alt);
+  border-color: var(--rule-strong);
+}
+.profilePageMain .profField.filled {
+  background: var(--bg);
+  border-color: var(--rule);
+}
+.profilePageMain .profField:focus-within {
+  background: var(--bg);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(47, 111, 78, 0.12);
+}
+.profilePageMain .profField .profFieldIcon {
+  color: var(--muted);
+  transition: color 0.18s ease;
+}
+.profilePageMain .profField.filled .profFieldIcon,
+.profilePageMain .profField:focus-within .profFieldIcon {
+  color: var(--accent);
+}
+.profilePageMain .profField input {
+  flex: 1;
+  min-width: 0;
+  height: auto;
+  border: none;
+  outline: none;
+  background: transparent;
+  padding: 0;
+  font-family: inherit;
+  font-size: 15px;
+  line-height: 1.4;
+  color: var(--ink);
+}
+.profilePageMain .profField input::placeholder { color: var(--muted); }
+
+/* ─────────────────────────────────────────
+   RESPONSIVE
+   ───────────────────────────────────────── */
+@media (max-width: 1240px) {
+  .profilePage .profileShell {
+    grid-template-columns: 220px 1fr !important;
+    gap: 40px !important;
+    padding: 32px 24px 80px !important;
+  }
+  .profilePage .contentPanel {
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: 880px !important;
+  }
+  .profilePage .profileNav {
+    width: 220px !important;
+    min-width: 220px !important;
+    max-width: 220px !important;
+  }
+}
+
+@media (max-width: 1024px) {
+  .profileHero { padding: 48px 28px; }
+  .profStatsStrip { width: calc(100% - 56px); padding: 24px; }
+  .favPlaces { width: calc(100% - 56px); }
+  .profilePage .favPlaces .favPlacesGrid { grid-template-columns: repeat(2, 1fr) !important; }
+  .profilePage .profFieldGrid { grid-template-columns: 1fr !important; }
+}
+
+@media (max-width: 900px) {
+  .profilePage .profileShell {
+    grid-template-columns: 1fr !important;
+    gap: 24px !important;
+    padding: 24px 16px 64px !important;
+    justify-content: stretch !important;
+  }
+  .profilePage .profileNav {
+    position: static !important;
+    grid-column: 1 !important;
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    flex-direction: row !important;
+    overflow-x: auto !important;
+    padding-bottom: 8px !important;
+    scrollbar-width: none !important;
+  }
+  .profilePage .profileNav::-webkit-scrollbar { display: none !important; }
+  .profilePage .profileNav h1 { display: none !important; }
+  .profilePage .navItem {
+    flex-shrink: 0 !important;
+    width: auto !important;
+    padding: 8px 14px !important;
+    border: 1px solid var(--rule-strong) !important;
+    border-radius: var(--radius-pill) !important;
+    font-size: 13px !important;
+    white-space: nowrap !important;
+  }
+  .profilePage .navItem.active {
+    background: var(--ink) !important;
+    border-color: var(--ink) !important;
+    color: #fff !important;
+  }
+  .profilePage .navItem.active .navIcon { color: #fff !important; }
+  .profilePage .navItem .navIcon { width: 16px !important; height: 16px !important; }
+  .profilePage .navItem .navIcon svg { width: 16px !important; height: 16px !important; }
+  .profilePage .contentPanel {
+    grid-column: 1 !important;
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+  }
+  .profilePage .panelTitle { font-size: 28px !important; }
+}
+
+@media (max-width: 768px) {
+  .profileHero {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 24px;
+    padding: 36px 20px;
+  }
+  .profHeroLeft { flex-direction: row; align-items: center; gap: 12px; }
+  .profHeroName { font-size: 28px; }
+  .profHeroAvatar { width: 72px; height: 72px; font-size: 26px; }
+  .profHeroRight { width: 100%; }
+  .profEditBtn { width: 100%; justify-content: center; }
+
+  .profStatsStrip {
+    width: calc(100% - 40px);
+    padding: 18px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  .profStatValue { font-size: 26px; }
+
+  .favPlaces { width: calc(100% - 40px); }
+
+  .identityCard {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 24px;
+    gap: 18px;
+  }
+  .identityAvatar { width: 72px; height: 72px; font-size: 26px; }
+  .identityName { font-size: 26px; }
+  .identityEditBtn { align-self: stretch; justify-content: center; }
+}
+
+@media (max-width: 640px) {
+  .profilePage .favPlacesGrid { grid-template-columns: 1fr !important; }
+  .profilePage .favPlaces .favPlacesGrid { grid-template-columns: 1fr !important; }
+  .profilePage .profFieldGrid { grid-template-columns: 1fr !important; }
+  .detailsGrid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 480px) {
+  .profHeroMeta { gap: 6px 14px; font-size: 12px; }
+  .profStatsStrip { grid-template-columns: 1fr 1fr; }
+}

@@ -1,0 +1,522 @@
+/* ───────── TRIP OVERVIEW PAGE ───────── */
+.tripOverview {
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--sans);
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 72px; /* room for fixed sync bar */
+  animation: fadeUp 0.5s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+
+.tripOverviewLoading {
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 12px;
+  color: var(--muted);
+}
+.tripOverviewLoading p { margin: 0; font-size: 14px; }
+.tripLogo {
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: "Voyage", "DM Sans", serif;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  cursor: pointer;
+  color: var(--ink);
+}
+.tripLogo span { color: var(--accent); }
+
+/* ── Dark hero band ── */
+.tripHero {
+  background: var(--ink);
+  color: #fff;
+  padding: 28px 32px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.tripHeroTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.tripHero .tripLogo {
+  color: #fff;
+}
+.tripHero .tripLogo span { color: var(--accent); }
+
+.tripHeroActions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.offlinePill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: var(--radius-pill);
+  font-size: 12px;
+  font-weight: 500;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.04);
+}
+.offlinePill svg { width: 12px; height: 12px; color: var(--accent); stroke-width: 2.4; }
+.offlinePill.is-offline {
+  border-color: rgba(255, 255, 255, 0.18);
+  color: rgba(255, 255, 255, 0.88);
+}
+.pulseDot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: #f0a020;
+  display: inline-block;
+  animation: pulse 1.6s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.45; transform: scale(0.85); }
+}
+
+.heroBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: var(--radius-pill);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.18s ease, color 0.18s ease, transform 0.18s ease, border-color 0.18s ease;
+}
+.heroBtn svg { width: 14px; height: 14px; }
+.heroBtnGhost {
+  background: transparent;
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+.heroBtnGhost:hover { background: rgba(255, 255, 255, 0.08); border-color: rgba(255, 255, 255, 0.5); }
+.heroBtnSolid {
+  background: #fff;
+  color: var(--ink);
+  border: 1px solid #fff;
+}
+.heroBtnSolid:hover { background: #f5f5f5; }
+.heroBtn:active { transform: scale(0.98); }
+
+.tripHeroBody {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 32px;
+}
+.tripHeroLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+.sharedPill {
+  align-self: flex-start;
+  padding: 4px 12px;
+  background: var(--green-tint);
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: var(--radius-pill);
+  letter-spacing: 0.1px;
+}
+.tripTitle {
+  margin: 0;
+  font-family: "Voyage", "DM Sans", serif;
+  font-size: 44px;
+  font-weight: 700;
+  letter-spacing: -0.8px;
+  line-height: 1.05;
+  color: #fff;
+}
+.tripMetaLine {
+  margin: 0;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.72);
+  line-height: 1.5;
+}
+
+.tripHeroStats {
+  display: flex;
+  gap: 12px;
+  flex-shrink: 0;
+}
+.heroStatBox {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  min-width: 96px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.heroStatValue {
+  font-size: 28px;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.05;
+  letter-spacing: -0.4px;
+}
+.heroStatLabel {
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* ── Stats strip under hero ── */
+.tripStatsStrip {
+  background: var(--bg-alt);
+  border-bottom: 1px solid var(--rule);
+  padding: 24px 32px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+.tripStat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 4px;
+}
+.tripStatIcon {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  color: var(--accent);
+  margin-bottom: 4px;
+}
+.tripStatIcon svg { width: 18px; height: 18px; }
+.tripStatValue {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--ink);
+  letter-spacing: -0.2px;
+}
+.tripStatLabel {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* ── Day tabs ── */
+.dayTabs {
+  background: var(--bg);
+  border-bottom: 1px solid var(--rule);
+  padding: 16px 32px;
+}
+.dayTabsScroll {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.dayTabsScroll::-webkit-scrollbar { display: none; }
+.dayPill {
+  flex-shrink: 0;
+  background: var(--bg);
+  border: 1px solid var(--rule-strong);
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 8px 16px;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+}
+.dayPill:hover {
+  border-color: var(--ink);
+}
+.dayPill.active {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: #fff;
+}
+
+/* ── Day itinerary ── */
+.dayItinerary {
+  max-width: 760px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 32px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.dayHeader {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.dayBadge {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--ink);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+.dayHeaderText { display: flex; flex-direction: column; gap: 2px; }
+.dayTheme {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.3px;
+  color: var(--ink);
+}
+.dayMeta {
+  margin: 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.timeline {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+.timeline::before {
+  content: "";
+  position: absolute;
+  top: 6px;
+  bottom: 6px;
+  left: 16px;
+  width: 2px;
+  background: var(--rule-strong);
+  border-radius: 2px;
+}
+.timelineItem {
+  position: relative;
+  padding-left: 48px;
+  padding-bottom: 16px;
+}
+.timelineItem::before {
+  content: "";
+  position: absolute;
+  top: 18px;
+  left: 11px;
+  width: 12px;
+  height: 12px;
+  background: var(--ink);
+  border-radius: 50%;
+  border: 2px solid var(--bg);
+  box-shadow: 0 0 0 1px var(--rule-strong);
+}
+
+.stopCard {
+  background: var(--bg);
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+.stopCard:hover {
+  border-color: var(--rule-strong);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+.stopCardTop {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+.stopTitle {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.1px;
+  color: var(--ink);
+}
+.stopTime {
+  font-size: 14px;
+  color: var(--muted);
+  font-weight: 500;
+  white-space: nowrap;
+}
+.stopType {
+  margin: 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+.stopDesc {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+.stopTags {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+.stopTag {
+  background: var(--bg-alt);
+  border: 1px solid var(--rule);
+  padding: 4px 10px;
+  font-size: 12px;
+  color: var(--ink-soft);
+  border-radius: var(--radius-pill);
+}
+
+.transitRow {
+  margin: 12px 0 4px;
+  padding: 8px 0 8px 48px;
+  font-size: 12px;
+  color: var(--muted);
+  letter-spacing: 0.1px;
+}
+
+.emptyDay {
+  margin: 12px 0 0 48px;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.stopDesc {
+  max-width: 480px;
+  overflow-wrap: break-word;
+}
+
+/* ── Sync bar ── */
+.syncBar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--bg-alt);
+  border-top: 1px solid var(--rule);
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  z-index: 30;
+}
+.syncBarLeft {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.syncIcon {
+  display: grid;
+  place-items: center;
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.syncIcon svg { width: 14px; height: 14px; }
+.syncIconOk { background: var(--green-tint); color: var(--accent); }
+.syncIconOff { background: #fff3e0; color: #d97706; }
+.syncText {
+  font-size: 13px;
+  color: var(--ink-soft);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.syncBtn {
+  flex-shrink: 0;
+  background: var(--bg);
+  border: 1px solid var(--rule-strong);
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 8px 16px;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition: border-color 0.18s ease, background 0.18s ease;
+}
+.syncBtn:hover:not(:disabled) { border-color: var(--ink); background: var(--bg-alt); }
+.syncBtn:disabled {
+  color: var(--muted);
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* Toast styles now live in styles/toast.css (shared via Toast component) */
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+  .tripHero { padding: 16px 24px 28px; }
+  .tripHeroBody {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 24px;
+  }
+  .tripHeroStats {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .heroStatBox {
+    flex: 1;
+    min-width: 0;
+    padding: 12px 8px;
+  }
+  .heroStatValue { font-size: 22px; }
+  .tripTitle { font-size: 36px; letter-spacing: -0.6px; }
+}
+
+@media (max-width: 768px) {
+  .tripStatsStrip {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px 16px;
+    padding: 20px 24px;
+  }
+  .dayTabs { padding: 14px 20px; }
+  .dayItinerary { padding: 24px 18px; }
+  .syncBar { padding: 10px 16px; gap: 10px; }
+  .syncText { white-space: normal; line-height: 1.4; }
+  .syncBtn { padding: 7px 12px; font-size: 12px; }
+}
+
+@media (max-width: 480px) {
+  .tripHero { padding: 14px 18px 22px; }
+  .tripHeroTop { flex-wrap: wrap; gap: 10px; }
+  .heroBtn { font-size: 12px; padding: 7px 12px; }
+  .tripTitle { font-size: 30px; }
+  .timelineItem { padding-left: 40px; }
+  .timeline::before { left: 12px; }
+  .timelineItem::before { left: 7px; }
+  .transitRow { padding-left: 40px; }
+}

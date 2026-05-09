@@ -1,0 +1,28 @@
+.apiErrorBanner {
+  margin: 0 24px;
+  padding: 10px 16px;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  color: #9a3412;
+  border-radius: var(--radius);
+  font-family: var(--sans);
+  font-size: 13px;
+  text-align: center;
+}
+
+.stopDescPlan {
+  max-width: 480px;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+.emptyDay {
+  margin: 24px 0;
+  padding: 24px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 14px;
+  border: 1px dashed var(--rule-strong);
+  border-radius: var(--radius);
+  background: var(--bg-alt);
+}

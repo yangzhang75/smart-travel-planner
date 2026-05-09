@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useLayoutEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Icon } from "../components/Icons";
+import { useToast } from "../components/Toast";
 import SearchField, { fmtDateRange, fmtBudget, shiftMonth, addDays, isoFromDate, MonthView } from "../components/SearchField";
 
 // ───── Homepage data ─────
@@ -21,6 +22,7 @@ const BUDGET_PILLS = [500, 1000, 2000, 3000, 5000];
 
 export default function HomePage() {
   const navigate = useNavigate();
+  const { showToast, ToastNode } = useToast();
   const [where, setWhere] = useState("");
   const [dateStart, setDateStart] = useState("");
   const [dateEnd, setDateEnd] = useState("");
@@ -154,7 +156,14 @@ export default function HomePage() {
   return (
     <div className="app">
       <nav className="navbar">
-        <div className="logo">voyage<span>.ai</span></div>
+        <button
+          type="button"
+          className="logo logoButton"
+          onClick={() => navigate("/home")}
+          aria-label="Go to home"
+        >
+          voyage<span>.ai</span>
+        </button>
         <div className="navLinks">
           <button className="iconButton" aria-label="notifications">
             <Icon.bell />
@@ -172,23 +181,58 @@ export default function HomePage() {
             </button>
             {menuOpen && (
               <div className="avatarMenu" role="menu">
-                <button className="menuItem" onClick={() => { setMenuOpen(false); navigate("/profile"); }}>
+                <button
+                  role="menuitem"
+                  className="menuItem"
+                  onClick={() => { setMenuOpen(false); navigate("/profile"); }}
+                >
                   <span className="menuIcon"><Icon.person /></span>Profile
                 </button>
-                <button className="menuItem" onClick={() => setMenuOpen(false)}>
+                <button
+                  role="menuitem"
+                  className="menuItem"
+                  onClick={() => {
+                    setMenuOpen(false);
+                    const el = document.getElementById("my-trips");
+                    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+                  }}
+                >
                   <span className="menuIcon"><Icon.suitcase /></span>My Trips
                 </button>
-                <button className="menuItem" onClick={() => setMenuOpen(false)}>
+                <button
+                  role="menuitem"
+                  className="menuItem"
+                  onClick={() => { setMenuOpen(false); navigate("/profile?tab=saved"); }}
+                >
                   <span className="menuIcon"><Icon.heart /></span>Saved Places
                 </button>
-                <button className="menuItem" onClick={() => setMenuOpen(false)}>
+                <button
+                  role="menuitem"
+                  className="menuItem"
+                  onClick={() => { setMenuOpen(false); showToast("Account settings — coming soon"); }}
+                >
                   <span className="menuIcon"><Icon.gear /></span>Account settings
                 </button>
-                <button className="menuItem" onClick={() => setMenuOpen(false)}>
+                <button
+                  role="menuitem"
+                  className="menuItem"
+                  onClick={() => { setMenuOpen(false); showToast("Help Center — coming soon"); }}
+                >
                   <span className="menuIcon"><Icon.help /></span>Help Center
                 </button>
+                <button
+                  role="menuitem"
+                  className="menuItem"
+                  onClick={() => { setMenuOpen(false); navigate("/about"); }}
+                >
+                  <span className="menuIcon"><Icon.info /></span>About
+                </button>
                 <div className="menuDivider"></div>
-                <button className="menuItem" onClick={() => navigate("/signin")}>
+                <button
+                  role="menuitem"
+                  className="menuItem"
+                  onClick={() => navigate("/signin")}
+                >
                   <span className="menuIcon"><Icon.logout /></span>Log out
                 </button>
               </div>
@@ -301,18 +345,24 @@ export default function HomePage() {
                 <div><Icon.users /> <span><strong>2</strong> travelers</span></div>
                 <div><Icon.wallet /> <span><strong>$1,500</strong> budget</span></div>
               </div>
-              <button className="ctaLink">View itinerary <Icon.arrowRight /></button>
+              <button className="ctaLink" onClick={() => navigate("/trip/tokyo-adventure")}>View itinerary <Icon.arrowRight /></button>
             </div>
           </article>
         </section>
 
-        <section className="sectionBlock" id="my-trips">
+        <section className="sectionBlock" id="my-trips" style={{ scrollMarginTop: 88 }}>
           <div className="sectionHeader">
             <h2>My trips</h2>
             <a className="more">View all</a>
           </div>
           <div className="tripGrid">
-            <article className="tripCard">
+            <article
+              className="tripCard"
+              role="button"
+              tabIndex={0}
+              onClick={() => navigate("/trip/paris-weekend")}
+              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); navigate("/trip/paris-weekend"); } }}
+            >
               <div className="cardImage">
                 <span className="tag">Upcoming</span>
                 <img src={HOME_IMG.paris} alt="Eiffel Tower in Paris" />
@@ -322,7 +372,13 @@ export default function HomePage() {
                 <p className="meta">France &middot; 3 days</p>
               </div>
             </article>
-            <article className="tripCard">
+            <article
+              className="tripCard"
+              role="button"
+              tabIndex={0}
+              onClick={() => navigate("/trip/seoul-food-tour")}
+              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); navigate("/trip/seoul-food-tour"); } }}
+            >
               <div className="cardImage">
                 <span className="tag">Upcoming</span>
                 <img src={HOME_IMG.seoul} alt="Seoul cityscape" />
@@ -344,6 +400,7 @@ export default function HomePage() {
           </div>
         </section>
       </main>
+      {ToastNode}
     </div>
   );
 }

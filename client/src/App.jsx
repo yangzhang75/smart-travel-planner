@@ -7,6 +7,9 @@ import SignUpPage from "./pages/SignUpPage";
 import HomePage from "./pages/HomePage";
 import ProfilePage from "./pages/ProfilePage";
 import PlanWithAIPage from "./pages/PlanWithAIPage";
+import AboutPage from "./pages/AboutPage";
+import TripOverviewPage from "./pages/TripOverviewPage";
+import ScrollToTop from "./components/ScrollToTop";
 
 // ───── Photo pool for auth pages ─────
 const PHOTOS = [
@@ -42,13 +45,16 @@ function App() {
 
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <Routes>
         <Route path="/signin" element={<SignInPage slide={slide} setSlide={setSlide} photo={PHOTOS[photos.signin]} onNavigate={() => rerollPhoto("signup")} />} />
         <Route path="/signup" element={<SignUpPage slide={slide} setSlide={setSlide} photo={PHOTOS[photos.signup]} onNavigate={() => rerollPhoto("signin")} />} />
         <Route path="/home" element={<HomePage />} />
         <Route path="/profile" element={<ProfilePage />} />
-        <Route path="*" element={<Navigate to="/signin" replace />} />
         <Route path="/plan" element={<PlanWithAIPage />} />
+        <Route path="/about" element={<AboutPage />} />
+        <Route path="/trip/:id" element={<TripOverviewPage />} />
+        <Route path="*" element={<Navigate to="/signin" replace />} />
       </Routes>
     </BrowserRouter>
   );

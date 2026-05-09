@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import "../styles/planWithAI.css";
 
 const loadingSteps = [
   "Researching destinations",
@@ -49,17 +50,18 @@ export default function PlanWithAIPage() {
   const [loading, setLoading] = useState(true);
   const [activeStep, setActiveStep] = useState(0);
   const [tripData, setTripData] = useState(null);
+  const [apiError, setApiError] = useState(false);
 
   const destination = state?.where || "Tokyo, Japan";
   const dates = state?.dateLabel || "Jul 12–19";
   const travelers = state?.whoLabel || "2 travelers";
   const budget = state?.budgetLabel || "$2,250";
 
-  const days = tripData?.days || sampleDays;
+  const days = Array.isArray(tripData?.days) && tripData.days.length > 0 ? tripData.days : sampleDays;
   const selectedDay = days[0];
-  const stops = Array.isArray(selectedDay?.stops)
-  ? selectedDay.stops
-  : sampleStops;
+  const stops = Array.isArray(selectedDay?.stops) && selectedDay.stops.length > 0
+    ? selectedDay.stops
+    : sampleStops;
 
   useEffect(() => {
     const stepTimer = setInterval(() => {
@@ -86,30 +88,43 @@ export default function PlanWithAIPage() {
             budgetLabel: state?.budgetLabel,
           }),
         });
+        if (!res.ok) throw new Error(`API ${res.status}`);
 
         const data = await res.json();
         setTripData(data);
+        setApiError(false);
 
         setTimeout(() => {
           setLoading(false);
         }, 4500);
       } catch (error) {
         console.error(error);
-        setLoading(false);
+        setApiError(true);
+        // Fall back to sample data so the layout is never empty
+        setTripData(null);
+        setTimeout(() => {
+          setLoading(false);
+        }, 1200);
       }
     }
 
     generateTrip();
 
     return () => clearInterval(stepTimer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (loading) {
     return (
       <div className="aiLoadingPage">
-        <div className="loadingLogo logo">
+        <button
+          type="button"
+          className="loadingLogo logo logoButton"
+          onClick={() => navigate("/home")}
+          aria-label="Go to home"
+        >
           voyage<span>.ai</span>
-        </div>
+        </button>
 
         <div className="loadingCenter">
           <div className="loadingCircle">AI</div>
@@ -168,9 +183,14 @@ export default function PlanWithAIPage() {
   return (
     <div className="tripDetailPage">
       <header className="tripTopbar">
-        <div className="tripBrand logo">
+        <button
+          type="button"
+          className="tripBrand logo logoButton"
+          onClick={() => navigate("/home")}
+          aria-label="Go to home"
+        >
           voyage<span>.ai</span>
-        </div>
+        </button>
 
         <div className="tripTitle">
           {tripData?.title || `${destination} Adventure`} · {dates}
@@ -182,19 +202,25 @@ export default function PlanWithAIPage() {
         </div>
       </header>
 
+      {apiError && (
+        <div className="apiErrorBanner" role="status">
+          Couldn't reach AI right now. Showing sample itinerary.
+        </div>
+      )}
+
       <div className="tripLayout">
         <aside className="tripSidebar">
           <p className="sidebarLabel">ITINERARY</p>
 
           {days.map((d, index) => (
             <button
-              key={d.day}
+              key={d.day || index}
               className={`dayItem ${index === 0 ? "active" : ""}`}
             >
-              <strong>{d.day}</strong>
+              <strong>{d.day || `Day ${index + 1}`}</strong>
               <span>{d.date}</span>
               <small>
-                {Array.isArray(d.stops) ? d.stops.length : d.stops || 0} stops
+                {Array.isArray(d.stops) ? d.stops.length : (d.stops || 0)} stops
               </small>
             </button>
           ))}
@@ -219,24 +245,31 @@ export default function PlanWithAIPage() {
           </div>
 
           <div className="stopList">
-            {stops.map((stop, index) => (
-              <article className="stopCard" key={stop.title || index}>
-                <div className="dragDots">⋮</div>
+            {Array.isArray(stops) && stops.length > 0 ? (
+              stops.map((stop, index) => {
+                const desc = stop.description || stop.desc;
+                return (
+                  <article className="stopCard" key={stop.title ? `${stop.title}-${index}` : index}>
+                    <div className="dragDots">⋮</div>
 
-                <div className="stopTime">
-                  <strong>{stop.time}</strong>
-                  <span>{stop.duration}</span>
-                </div>
+                    <div className="stopTime">
+                      <strong>{stop.time || "—"}</strong>
+                      {stop.duration && <span>{stop.duration}</span>}
+                    </div>
 
-                <div className="stopInfo">
-                  <h3>{stop.title}</h3>
-                  <p className="stopType">{stop.type}</p>
-                  <p>{stop.description || stop.desc}</p>
-                </div>
+                    <div className="stopInfo">
+                      <h3>{stop.title || "Untitled stop"}</h3>
+                      {stop.type && <p className="stopType">{stop.type}</p>}
+                      {desc && <p className="stopDescPlan">{desc}</p>}
+                    </div>
 
-                <div className="stopCost">{stop.cost}</div>
-              </article>
-            ))}
+                    {stop.cost && <div className="stopCost">{stop.cost}</div>}
+                  </article>
+                );
+              })
+            ) : (
+              <p className="emptyDay">No activities planned for this day.</p>
+            )}
           </div>
         </main>
 

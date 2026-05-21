@@ -19,6 +19,15 @@ We are group09-Smart Travel Planner doing an website called Voyage.ai which is a
 - CSS
 
 ### How to Run
+
+Add your OpenAI API key to **`server/.env`**:
+
+```
+OPENAI_API_KEY=sk-your-key-here
+```
+
+Get a key at https://platform.openai.com/api-keys
+
 Open two terminals.
 
 ##### Terminal 1: backend

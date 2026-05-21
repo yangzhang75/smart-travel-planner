@@ -1,17 +1,27 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+import path from "path";
+import { fileURLToPath } from "url";
 import OpenAI from "openai";
 
-dotenv.config();
-console.log(process.env.OPENAI_API_KEY);
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+dotenv.config({ path: path.join(__dirname, ".env") });
+
+const apiKey = process.env.OPENAI_API_KEY?.trim();
+if (!apiKey) {
+  console.error(
+    "Missing OPENAI_API_KEY. Add your key to server/.env:\n" +
+      '  OPENAI_API_KEY=sk-your-key-here'
+  );
+  process.exit(1);
+}
+
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-const client = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+const client = new OpenAI({ apiKey });
 
 app.post("/api/plan-trip", async (req, res) => {
   try {
@@ -67,6 +77,7 @@ Return this exact JSON shape:
   }
 });
 
-app.listen(5000, () => {
-  console.log("Server running on http://localhost:5000");
+const PORT = process.env.PORT || 5001;
+app.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
 });

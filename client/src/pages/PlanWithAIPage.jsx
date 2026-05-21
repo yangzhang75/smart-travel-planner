@@ -51,6 +51,7 @@ export default function PlanWithAIPage() {
   const [activeStep, setActiveStep] = useState(0);
   const [tripData, setTripData] = useState(null);
   const [apiError, setApiError] = useState(false);
+  const [selectedDayIndex, setSelectedDayIndex] = useState(0);
 
   const destination = state?.where || "Tokyo, Japan";
   const dates = state?.dateLabel || "Jul 12–19";
@@ -58,10 +59,15 @@ export default function PlanWithAIPage() {
   const budget = state?.budgetLabel || "$2,250";
 
   const days = Array.isArray(tripData?.days) && tripData.days.length > 0 ? tripData.days : sampleDays;
-  const selectedDay = days[0];
-  const stops = Array.isArray(selectedDay?.stops) && selectedDay.stops.length > 0
-    ? selectedDay.stops
-    : sampleStops;
+  const safeDayIndex = Math.min(selectedDayIndex, days.length - 1);
+  const selectedDay = days[safeDayIndex];
+  // Only fall back to sampleStops on day 1; other days show their own stops (or empty state)
+  const selectedDayStops = Array.isArray(selectedDay?.stops) ? selectedDay.stops : [];
+  const stops = selectedDayStops.length > 0
+    ? selectedDayStops
+    : safeDayIndex === 0
+    ? sampleStops
+    : [];
 
   useEffect(() => {
     const stepTimer = setInterval(() => {
@@ -76,7 +82,7 @@ export default function PlanWithAIPage() {
 
     async function generateTrip() {
       try {
-        const res = await fetch("http://localhost:5000/api/plan-trip", {
+        const res = await fetch("http://localhost:5001/api/plan-trip", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -215,7 +221,9 @@ export default function PlanWithAIPage() {
           {days.map((d, index) => (
             <button
               key={d.day || index}
-              className={`dayItem ${index === 0 ? "active" : ""}`}
+              type="button"
+              className={`dayItem ${index === safeDayIndex ? "active" : ""}`}
+              onClick={() => setSelectedDayIndex(index)}
             >
               <strong>{d.day || `Day ${index + 1}`}</strong>
               <span>{d.date}</span>

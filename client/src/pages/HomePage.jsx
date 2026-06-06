@@ -34,6 +34,8 @@ export default function HomePage() {
   const { showToast, ToastNode } = useToast();
   const user = auth.getUser();
   const greetName = user?.name?.split(" ")[0] || "traveler";
+  const lastName = user?.name?.trim().split(" ").pop();
+  const avatarInitial = lastName?.charAt(0).toUpperCase() || "U";
   const [trips, setTrips] = useState([]);
   const [tripsLoading, setTripsLoading] = useState(true);
   const [tripsError, setTripsError] = useState("");
@@ -212,7 +214,7 @@ export default function HomePage() {
             <Icon.bell />
             <span className="bellDot"></span>
           </button>
-          <div className="avatar" aria-label="user profile">Y</div>
+          <div className="avatar" aria-label="user profile">{avatarInitial}</div>
           <div className="menuWrap" ref={menuRef}>
             <button
               className={`menuBtn ${menuOpen ? "is-open" : ""}`}

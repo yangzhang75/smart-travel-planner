@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef} from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   Icon,
@@ -187,6 +187,8 @@ export default function ProfilePage() {
 
   const [me, setMe] = useState(() => auth.getUser());
   const [trips, setTrips] = useState([]);
+  const photoInputRef = useRef(null);
+  const [profilePhoto, setProfilePhoto] = useState(() => {return localStorage.getItem("voyage_profile_photo") || "";});
   const [tripsLoading, setTripsLoading] = useState(true);
   const [editName, setEditName] = useState(() => auth.getUser()?.name || "");
   const [editEmail, setEditEmail] = useState(() => auth.getUser()?.email || "");
@@ -250,6 +252,27 @@ export default function ProfilePage() {
     } finally {
       setSavingAccount(false);
     }
+  };
+
+  const handlePhotoChange = (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+  
+    if (!file.type.startsWith("image/")) {
+      showToast("Please choose an image file");
+      return;
+    }
+  
+    const reader = new FileReader();
+  
+    reader.onload = () => {
+      const imageDataUrl = reader.result;
+      setProfilePhoto(imageDataUrl);
+      localStorage.setItem("voyage_profile_photo", imageDataUrl);
+      showToast("Profile photo updated");
+    };
+  
+    reader.readAsDataURL(file);
   };
 
   // Derived stats from real trips
@@ -398,7 +421,13 @@ export default function ProfilePage() {
         <div className="navLinks">
           <button className="profIconBtn" aria-label="Back to home" onClick={() => navigate("/home")}><ArrowLeft /></button>
           <button className="profIconBtn" aria-label="Notifications"><Icon.bell /></button>
-          <div className="profNavAvatar">{displayInitials}</div>
+          <div className="profNavAvatar">
+            {profilePhoto ? (
+              <img src={profilePhoto} alt="" className="profilePhotoImg" />
+            ) : (
+              displayInitials
+            )}
+          </div>
         </div>
       </nav>
 
@@ -406,14 +435,28 @@ export default function ProfilePage() {
         {/* Hero */}
         <section className="profileHero">
           <div className="profHeroLeft">
-            <div className="profHeroAvatar" aria-hidden="true">{displayInitials}</div>
-            <button
-              type="button"
-              className="profHeroPhotoBtn"
-              onClick={() => showToast("Coming soon: change photo")}
-            >
-              Change photo
-            </button>
+          <div className="profHeroAvatar" aria-hidden="true">
+            {profilePhoto ? (
+              <img src={profilePhoto} alt="" className="profilePhotoImg" />
+            ) : (
+              displayInitials
+            )}
+          </div>
+          <button
+            type="button"
+            className="profHeroPhotoBtn"
+            onClick={() => photoInputRef.current?.click()}
+          >
+            Change photo
+          </button>
+
+          <input
+            ref={photoInputRef}
+            type="file"
+            accept="image/*"
+            className="photoInput"
+            onChange={handlePhotoChange}
+          />
           </div>
           <div className="profHeroCenter">
             <h1 className="profHeroName">{displayName}</h1>
@@ -484,7 +527,13 @@ export default function ProfilePage() {
 
               {/* Identity card */}
               <section className="identityCard">
-                <div className="identityAvatar" aria-hidden="true">{displayInitials}</div>
+              <div className="identityAvatar" aria-hidden="true">
+                {profilePhoto ? (
+                  <img src={profilePhoto} alt="" className="profilePhotoImg" />
+                ) : (
+                  displayInitials
+                )}
+              </div>
                 <div className="identityBody">
                   <h2 className="identityName">{displayName}</h2>
                   <div className="identityBadges">

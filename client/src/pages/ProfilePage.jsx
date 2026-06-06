@@ -430,7 +430,11 @@ export default function ProfilePage() {
         </button>
         <div className="navLinks">
           <button className="profIconBtn" aria-label="Back to home" onClick={() => navigate("/home")}><ArrowLeft /></button>
-          <button className="profIconBtn" aria-label="Notifications"><Icon.bell /></button>
+          <button
+            className="profIconBtn"
+            aria-label="Notifications"
+            onClick={() => showToast("No new notifications")}
+          ><Icon.bell /></button>
           <div className="profNavAvatar">
             {profilePhoto ? (
               <img src={profilePhoto} alt="" className="profilePhotoImg" />

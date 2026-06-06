@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { api, auth } from "../utils/api";
 import TripMap from "../components/TripMap";
@@ -11,6 +11,21 @@ const parseCost = (s) => {
   const cleaned = String(s).replace(/[^\d.]/g, "");
   return parseFloat(cleaned) || 0;
 };
+
+const timeToMinutes = (t) => {
+  if (!t) return Number.POSITIVE_INFINITY;
+  const m = String(t).trim().match(/^(\d{1,2}):?(\d{2})?\s*(AM|PM)?$/i);
+  if (!m) return Number.POSITIVE_INFINITY;
+  let h = parseInt(m[1], 10);
+  const min = parseInt(m[2] || "0", 10);
+  const ap = m[3]?.toUpperCase();
+  if (ap === "PM" && h !== 12) h += 12;
+  if (ap === "AM" && h === 12) h = 0;
+  return h * 60 + min;
+};
+
+const sortStopsByTime = (stops) =>
+  [...stops].sort((a, b) => timeToMinutes(a.time) - timeToMinutes(b.time));
 
 const nextDateAfter = (lastDateStr) => {
   if (!lastDateStr) return "";
@@ -118,11 +133,15 @@ export default function PlanWithAIPage() {
       showToast("Please enter a title");
       return;
     }
+    if (!newStop.time.trim()) {
+      showToast("Please enter a time");
+      return;
+    }
     setSavingMutation(true);
     try {
       const updatedDays = (tripData.days || []).map((d, i) =>
         i === safeDayIndex
-          ? { ...d, stops: [...(d.stops || []), { ...newStop }] }
+          ? { ...d, stops: sortStopsByTime([...(d.stops || []), { ...newStop }]) }
           : d
       );
       const updated = await api.updateTrip(tripData._id, { days: updatedDays });
@@ -165,7 +184,14 @@ export default function PlanWithAIPage() {
     ? sampleStops
     : [];
 
+  const hasGeneratedRef = useRef(false);
+
   useEffect(() => {
+    // Guard against React.StrictMode double-invocation of effects in dev,
+    // which would otherwise POST /api/plan-trip twice and create duplicate trips.
+    if (hasGeneratedRef.current) return;
+    hasGeneratedRef.current = true;
+
     const stepTimer = setInterval(() => {
       setActiveStep((prev) => {
         if (prev >= loadingSteps.length - 1) {
@@ -187,6 +213,8 @@ export default function PlanWithAIPage() {
           dateLabel: state?.dateLabel,
           whoLabel: state?.whoLabel,
           budgetLabel: state?.budgetLabel,
+          dateStart: state?.dateStart,
+          dateEnd: state?.dateEnd,
         });
         setTripData(data);
         setApiError(false);
@@ -557,11 +585,14 @@ export default function PlanWithAIPage() {
             </p>
 
             <label style={{ fontSize: 12, color: "#555" }}>
-              Time
+              Time <span style={{ color: "#b00020" }}>*</span>
               <input
                 value={newStop.time}
                 onChange={(e) => setNewStop((s) => ({ ...s, time: e.target.value }))}
-                placeholder="e.g. 9:00"
+                placeholder="e.g. 9:00 or 14:30"
+                required
+                pattern="\d{1,2}:?\d{0,2}\s*(AM|PM|am|pm)?"
+                title="Use HH:MM (e.g. 9:00 or 14:30), optionally with AM/PM"
                 style={inputStyle}
               />
             </label>

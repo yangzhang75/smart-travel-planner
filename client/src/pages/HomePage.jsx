@@ -32,11 +32,22 @@ const BUDGET_PILLS = [500, 1000, 2000, 3000, 5000];
 export default function HomePage() {
   const navigate = useNavigate();
   const { showToast, ToastNode } = useToast();
-  const user = auth.getUser();
+  const [user, setUser] = useState(() => auth.getUser());
   const profilePhoto = localStorage.getItem("voyage_profile_photo") || "";
   const greetName = user?.name?.split(" ")[0] || "traveler";
   const lastName = user?.name?.trim().split(" ").pop();
   const avatarInitial = lastName?.charAt(0).toUpperCase() || "U";
+
+  // React to user updates from other tabs (e.g., profile edit in a new tab)
+  useEffect(() => {
+    const onStorage = (e) => {
+      if (e.key === "voyage_user" || e.key === null) {
+        setUser(auth.getUser());
+      }
+    };
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, []);
   const [trips, setTrips] = useState([]);
   const [tripsLoading, setTripsLoading] = useState(true);
   const [tripsError, setTripsError] = useState("");
@@ -158,10 +169,18 @@ export default function HomePage() {
   const totalGuests = adults + children;
   const whoLabel = totalGuests > 0 ? `${totalGuests} guest${totalGuests === 1 ? "" : "s"}` : "";
 
+  const MAX_TRIP_DAYS = 14;
   const handleDayPick = (iso) => {
     if (!dateStart || (dateStart && dateEnd)) { setDateStart(iso); setDateEnd(""); }
     else if (iso < dateStart) { setDateStart(iso); setDateEnd(""); }
-    else { setDateEnd(iso); }
+    else {
+      const days = Math.round((new Date(iso) - new Date(dateStart)) / 86400000) + 1;
+      if (days > MAX_TRIP_DAYS) {
+        showToast("Maximum trip length is 2 weeks");
+        return;
+      }
+      setDateEnd(iso);
+    }
   };
 
   const applyQuickRange = (kind) => {
@@ -211,7 +230,11 @@ export default function HomePage() {
           voyage<span>.ai</span>
         </button>
         <div className="navLinks">
-          <button className="iconButton" aria-label="notifications">
+          <button
+            className="iconButton"
+            aria-label="notifications"
+            onClick={() => showToast("No new notifications")}
+          >
             <Icon.bell />
             <span className="bellDot"></span>
           </button>
@@ -389,15 +412,23 @@ export default function HomePage() {
               <img src={HOME_IMG.tokyo} alt="Tokyo cityscape" />
             </div>
             <div className="comingInfo">
-              <p className="label">Next trip</p>
-              <h3>Tokyo, Japan</h3>
-              <p className="country">Honsh&#363; &middot; Capital region</p>
+              <p className="label">Inspiration</p>
+              <h3>Plan your next adventure</h3>
+              <p className="country">Tell us where you're dreaming of going next.</p>
               <div className="tripMeta">
-                <div><Icon.calendar /> <span><strong>May 20</strong> &ndash; May 25</span></div>
-                <div><Icon.users /> <span><strong>2</strong> travelers</span></div>
-                <div><Icon.wallet /> <span><strong>$1,500</strong> budget</span></div>
+                <div><Icon.sparkle /> <span>AI-generated itinerary in seconds</span></div>
+                <div><Icon.wallet /> <span>Budget-aware recommendations</span></div>
+                <div><Icon.calendar /> <span>Tailored to your dates</span></div>
               </div>
-              <button className="ctaLink" onClick={() => navigate("/trip/tokyo-adventure")}>View itinerary <Icon.arrowRight /></button>
+              <button
+                className="ctaLink"
+                onClick={() => {
+                  searchBarRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+                  setActiveField("where");
+                }}
+              >
+                Start planning <Icon.arrowRight />
+              </button>
             </div>
           </article>
         </section>

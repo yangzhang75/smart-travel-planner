@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { GoogleIcon, AppleIcon } from "./Icons";
 
 export const PHOTO_OVERLAY =
@@ -45,22 +46,41 @@ export function BrandPanel({ activeIndex, onDot, photo }) {
 }
 
 export function OauthGroup() {
+  const [hint, setHint] = useState("");
+  const showHint = (provider) => {
+    setHint(`${provider} sign-in coming soon — use email for now`);
+    setTimeout(() => setHint(""), 2500);
+  };
   return (
     <>
       <div className="divider"><span>or continue with</span></div>
       <div className="oauthStack">
-        <button type="button" className="btnOauth"><GoogleIcon /> Continue with Google</button>
-        <button type="button" className="btnOauth"><AppleIcon /> Continue with Apple</button>
+        <button type="button" className="btnOauth" onClick={() => showHint("Google")}>
+          <GoogleIcon /> Continue with Google
+        </button>
+        <button type="button" className="btnOauth" onClick={() => showHint("Apple")}>
+          <AppleIcon /> Continue with Apple
+        </button>
       </div>
+      {hint && (
+        <p role="status" style={{ marginTop: 8, fontSize: 13, color: "#666", textAlign: "center" }}>
+          {hint}
+        </p>
+      )}
     </>
   );
 }
 
 export function Legal() {
+  const handleClick = (kind) => (e) => {
+    e.preventDefault();
+    alert(`${kind} — coming soon`);
+  };
   return (
     <p className="legal">
       By continuing, you agree to Voyage&rsquo;s{" "}
-      <a href="#terms">Terms</a> and <a href="#privacy">Privacy Policy</a>.
+      <a href="#terms" onClick={handleClick("Terms")}>Terms</a> and{" "}
+      <a href="#privacy" onClick={handleClick("Privacy Policy")}>Privacy Policy</a>.
     </p>
   );
 }

@@ -2,51 +2,66 @@ import { useEffect, useState, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Icon } from "../components/Icons";
 import { useToast } from "../components/Toast";
+import { api, auth } from "../utils/api";
 import "../styles/tripOverview.css";
 
-const SAMPLE_TRIP = {
-  id: "tokyo-adventure",
-  title: "Tokyo Adventure",
-  dateRange: "Jul 12 – 19, 2026",
-  travelers: 2,
-  vibe: "Cultural & Relaxing",
-  sharedBy: "Yoyo",
-  totals: { days: 7, stops: 28, cost: 1920 },
-  stats: { weather: "28°C avg", dailyCost: 274, walking: 42, restaurants: 14 },
-  days: [
-    {
-      day: 1,
-      theme: "Arrival & Shibuya",
-      date: "Saturday, Jul 12",
-      stops: [
-        { time: "9:00 AM", title: "Meiji Jingu Shrine", type: "Temple · Shibuya", desc: "Peaceful Shinto shrine surrounded by forest in the heart of Tokyo.", duration: "2 hrs", cost: "Free", transitAfter: "🚶 15 min walk" },
-        { time: "11:30 AM", title: "Takeshita Street", type: "Shopping · Harajuku", desc: "Iconic pedestrian street packed with kawaii fashion and street food.", duration: "1.5 hrs", cost: "Free", transitAfter: "🚆 5 min train" },
-        { time: "1:30 PM", title: "Ichiran Ramen Shibuya", type: "Restaurant · Shibuya", desc: "Solo-booth ramen experience — a must-try in Tokyo.", duration: "1 hr", cost: "~$12", transitAfter: "🚶 8 min walk" },
-        { time: "3:00 PM", title: "Shibuya Crossing & Sky", type: "Landmark · Shibuya", desc: "World-famous crossing, then sunset views from Shibuya Sky observatory.", duration: "2 hrs", cost: "~$18", transitAfter: null },
-      ],
-    },
-    {
-      day: 2,
-      theme: "Asakusa & Akihabara",
-      date: "Sunday, Jul 13",
-      stops: [
-        { time: "9:30 AM", title: "Senso-ji Temple", type: "Temple · Asakusa", desc: "Tokyo's oldest temple, with the iconic Kaminarimon gate.", duration: "1.5 hrs", cost: "Free", transitAfter: "🚶 10 min walk" },
-        { time: "11:30 AM", title: "Nakamise Shopping Street", type: "Shopping · Asakusa", desc: "Traditional snacks and souvenirs leading up to the temple.", duration: "1 hr", cost: "~$20", transitAfter: "🚆 25 min train" },
-        { time: "2:00 PM", title: "Akihabara Electric Town", type: "District · Akihabara", desc: "Anime, gaming, and electronics paradise.", duration: "3 hrs", cost: "~$40", transitAfter: null },
-      ],
-    },
-    {
-      day: 3,
-      theme: "Tsukiji & Ginza",
-      date: "Monday, Jul 14",
-      stops: [
-        { time: "7:30 AM", title: "Tsukiji Outer Market", type: "Market · Tsukiji", desc: "Fresh sushi breakfast and live food stalls.", duration: "2 hrs", cost: "~$25", transitAfter: "🚆 10 min train" },
-        { time: "11:00 AM", title: "Hamarikyu Gardens", type: "Garden · Chuo", desc: "Edo-period garden with tea house on the bay.", duration: "1.5 hrs", cost: "~$3", transitAfter: "🚶 12 min walk" },
-        { time: "1:30 PM", title: "Ginza Shopping District", type: "Shopping · Ginza", desc: "Luxury boutiques and the iconic Wako clock tower.", duration: "3 hrs", cost: "~$50", transitAfter: null },
-      ],
-    },
-  ],
+const parseCost = (s) => {
+  if (!s) return 0;
+  const cleaned = String(s).replace(/[^\d.]/g, "");
+  return parseFloat(cleaned) || 0;
 };
+
+const parseTravelers = (whoLabel) => {
+  const m = String(whoLabel || "").match(/(\d+)/);
+  return m ? parseInt(m[1], 10) : 1;
+};
+
+// Adapt a real backend Trip into the shape this page renders
+function adaptTrip(t, viewerName) {
+  const days = (t.days || []).map((d, i) => ({
+    day: i + 1,
+    theme: d.theme || `Day ${i + 1}`,
+    date: d.date,
+    stops: (d.stops || []).map((s) => ({
+      time: s.time,
+      title: s.title,
+      type: s.type,
+      desc: s.description || s.desc,
+      duration: s.duration,
+      cost: s.cost,
+    })),
+  }));
+  const totalStops = days.reduce((a, d) => a + (d.stops?.length || 0), 0);
+  const totalCost = parseCost(t.budget?.total) || days.reduce(
+    (a, d) => a + (d.stops || []).reduce((b, s) => b + parseCost(s.cost), 0),
+    0
+  );
+  const restaurantCount = days.reduce(
+    (a, d) => a + (d.stops || []).filter((s) => /food|restaurant|dining|cafe/i.test(s.type || "")).length,
+    0
+  );
+  return {
+    _id: t._id,
+    id: t._id,
+    title: t.title || t.where || "Trip",
+    dateRange: t.dateLabel || "",
+    travelers: parseTravelers(t.whoLabel),
+    vibe: t.budgetLabel || "Custom itinerary",
+    sharedBy: viewerName || "You",
+    totals: {
+      days: days.length,
+      stops: totalStops,
+      cost: Math.round(totalCost),
+    },
+    stats: {
+      weather: "—",
+      dailyCost: days.length > 0 ? Math.round(totalCost / days.length) : 0,
+      walking: "—",
+      restaurants: restaurantCount,
+    },
+    days,
+  };
+}
 
 function formatSyncDate(iso) {
   if (!iso) return "";
@@ -69,6 +84,8 @@ export default function TripOverviewPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [trip, setTrip] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [isOnline, setIsOnline] = useState(typeof navigator !== "undefined" ? navigator.onLine : true);
   const [lastSynced, setLastSynced] = useState(null);
   const [activeDay, setActiveDay] = useState(1);
@@ -76,32 +93,56 @@ export default function TripOverviewPage() {
   const { showToast, ToastNode } = useToast();
 
   useEffect(() => {
+    if (!auth.isAuthed()) { navigate("/signin"); return; }
+    if (!id) return;
+    let cancelled = false;
     const cacheKey = `voyage_trip_${id}`;
+
+    // Show cached data immediately if present, while we fetch fresh
     const cached = localStorage.getItem(cacheKey);
     if (cached) {
       try {
         const parsed = JSON.parse(cached);
         setTrip(parsed.data);
         setLastSynced(parsed.syncedAt);
-      } catch (e) {
-        // corrupt cache — ignore and fall through to fetch
+        setLoading(false);
+      } catch { /* corrupt cache — ignore */ }
+    }
+
+    if (!navigator.onLine) {
+      if (!cached) {
+        setError("You're offline and this trip hasn't been cached yet.");
+        setLoading(false);
       }
+      return;
     }
-    if (navigator.onLine) {
-      const t = setTimeout(() => {
-        const data = { ...SAMPLE_TRIP, id };
+
+    (async () => {
+      try {
+        const data = await api.getTrip(id);
+        if (cancelled) return;
+        const viewerName = auth.getUser()?.name || "You";
+        const adapted = adaptTrip(data, viewerName);
         const syncedAt = new Date().toISOString();
-        setTrip(data);
+        setTrip(adapted);
         setLastSynced(syncedAt);
+        setError("");
         try {
-          localStorage.setItem(cacheKey, JSON.stringify({ data, syncedAt }));
-        } catch (e) {
-          // storage full — silently degrade
-        }
-      }, 250);
-      return () => clearTimeout(t);
-    }
-  }, [id]);
+          localStorage.setItem(cacheKey, JSON.stringify({ data: adapted, syncedAt }));
+        } catch { /* storage full — silently degrade */ }
+      } catch (err) {
+        if (cancelled) return;
+        if (err.status === 401) { navigate("/signin"); return; }
+        if (err.status === 404) setError("Trip not found");
+        else if (err.status === 400) setError("Invalid trip ID");
+        else setError(err.message || "Couldn't load this trip");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+
+    return () => { cancelled = true; };
+  }, [id, navigate]);
 
   useEffect(() => {
     const onUp = () => setIsOnline(true);
@@ -123,25 +164,63 @@ export default function TripOverviewPage() {
     }
   };
 
-  const duplicateTrip = () => {
-    showToast("Trip duplicated to your account!");
+  const [duplicating, setDuplicating] = useState(false);
+  const duplicateTrip = async () => {
+    if (!trip) return;
+    if (!auth.isAuthed()) {
+      showToast("Please sign in to duplicate this trip");
+      navigate("/signin");
+      return;
+    }
+    setDuplicating(true);
+    try {
+      // Normalize sample-shape days (stop.desc → stop.description) for the backend schema
+      const normalizedDays = (Array.isArray(trip.days) ? trip.days : []).map((d) => ({
+        day: typeof d.day === "number" ? `Day ${d.day}` : d.day,
+        date: d.date,
+        theme: d.theme,
+        stops: (d.stops || []).map((s) => ({
+          time: s.time,
+          title: s.title,
+          type: s.type,
+          description: s.description || s.desc || "",
+          duration: s.duration,
+          cost: s.cost,
+        })),
+      }));
+      const newTrip = await api.createTrip({
+        title: `${trip.title} (copy)`,
+        where: trip.title,
+        days: normalizedDays,
+      });
+      showToast("Trip duplicated to your account");
+      navigate(`/trip/${newTrip._id}`);
+    } catch (err) {
+      showToast(err.message || "Couldn't duplicate trip");
+    } finally {
+      setDuplicating(false);
+    }
   };
 
-  const syncNow = () => {
+  const syncNow = async () => {
     if (!isOnline || syncing) return;
     setSyncing(true);
-    setTimeout(() => {
-      const cacheKey = `voyage_trip_${id}`;
-      const data = trip ?? { ...SAMPLE_TRIP, id };
+    try {
+      const data = await api.getTrip(id);
+      const viewerName = auth.getUser()?.name || "You";
+      const adapted = adaptTrip(data, viewerName);
       const syncedAt = new Date().toISOString();
-      setTrip(data);
+      setTrip(adapted);
       setLastSynced(syncedAt);
       try {
-        localStorage.setItem(cacheKey, JSON.stringify({ data, syncedAt }));
-      } catch (e) { /* noop */ }
-      setSyncing(false);
+        localStorage.setItem(`voyage_trip_${id}`, JSON.stringify({ data: adapted, syncedAt }));
+      } catch { /* noop */ }
       showToast("Trip synced");
-    }, 600);
+    } catch (err) {
+      showToast(err.message || "Sync failed");
+    } finally {
+      setSyncing(false);
+    }
   };
 
   const days = Array.isArray(trip?.days) ? trip.days : [];
@@ -153,7 +232,7 @@ export default function TripOverviewPage() {
 
   const activeStops = Array.isArray(activeDayData?.stops) ? activeDayData.stops : [];
 
-  if (!trip) {
+  if (loading && !trip) {
     return (
       <div className="tripOverview tripOverviewLoading">
         <button
@@ -168,6 +247,27 @@ export default function TripOverviewPage() {
       </div>
     );
   }
+
+  if (error && !trip) {
+    return (
+      <div className="tripOverview tripOverviewLoading">
+        <button
+          type="button"
+          className="logo logoButton tripLogo"
+          onClick={() => navigate("/home")}
+          aria-label="Go to home"
+        >
+          voyage<span>.ai</span>
+        </button>
+        <p style={{ color: "#b00020", marginTop: 24 }}>{error}</p>
+        <button onClick={() => navigate("/home")} style={{ marginTop: 16 }}>
+          Back to home
+        </button>
+      </div>
+    );
+  }
+
+  if (!trip) return null;
 
   const syncedLabel = formatSyncDate(lastSynced);
 
@@ -201,9 +301,14 @@ export default function TripOverviewPage() {
               <Icon.link />
               Copy Link
             </button>
-            <button className="heroBtn heroBtnSolid" onClick={duplicateTrip} aria-label="Duplicate trip">
+            <button
+              className="heroBtn heroBtnSolid"
+              onClick={duplicateTrip}
+              disabled={duplicating}
+              aria-label="Duplicate trip"
+            >
               <Icon.copy />
-              Duplicate Trip
+              {duplicating ? "Duplicating…" : "Duplicate Trip"}
             </button>
           </div>
         </div>

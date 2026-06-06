@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { Icon } from "../components/Icons";
+import { useToast } from "../components/Toast";
 import "../styles/about.css";
 
 const FEATURES = [
@@ -38,6 +39,7 @@ const STATS = [
 
 export default function AboutPage() {
   const navigate = useNavigate();
+  const { showToast, ToastNode } = useToast();
 
   return (
     <div className="aboutPage">
@@ -127,11 +129,12 @@ export default function AboutPage() {
       <footer className="aboutFooter">
         <span className="aboutCopy">© 2026 Voyage.ai. All rights reserved.</span>
         <nav className="aboutFootLinks" aria-label="Footer">
-          <button className="aboutFootLink">Privacy</button>
-          <button className="aboutFootLink">Terms</button>
-          <button className="aboutFootLink">Contact</button>
+          <button className="aboutFootLink" onClick={() => showToast("Privacy policy — coming soon")}>Privacy</button>
+          <button className="aboutFootLink" onClick={() => showToast("Terms — coming soon")}>Terms</button>
+          <button className="aboutFootLink" onClick={() => showToast("Contact us — coming soon")}>Contact</button>
         </nav>
       </footer>
+      {ToastNode}
     </div>
   );
 }

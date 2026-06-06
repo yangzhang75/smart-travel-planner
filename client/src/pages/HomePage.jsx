@@ -33,6 +33,7 @@ export default function HomePage() {
   const navigate = useNavigate();
   const { showToast, ToastNode } = useToast();
   const user = auth.getUser();
+  const profilePhoto = localStorage.getItem("voyage_profile_photo") || "";
   const greetName = user?.name?.split(" ")[0] || "traveler";
   const lastName = user?.name?.trim().split(" ").pop();
   const avatarInitial = lastName?.charAt(0).toUpperCase() || "U";
@@ -214,7 +215,13 @@ export default function HomePage() {
             <Icon.bell />
             <span className="bellDot"></span>
           </button>
-          <div className="avatar" aria-label="user profile">{avatarInitial}</div>
+          <div className="avatar" aria-label="user profile">
+            {profilePhoto ? (
+              <img src={profilePhoto} alt="" className="profilePhotoImg" />
+            ) : (
+              avatarInitial
+            )}
+          </div>
           <div className="menuWrap" ref={menuRef}>
             <button
               className={`menuBtn ${menuOpen ? "is-open" : ""}`}
@@ -376,7 +383,7 @@ export default function HomePage() {
         </section>
 
         <section className="sectionBlock">
-          <div className="sectionHeader"><h2>Suggested for you</h2></div>
+          <div className="sectionHeader"><h2>Coming up</h2></div>
           <article className="comingCard">
             <div className="comingImage">
               <img src={HOME_IMG.tokyo} alt="Tokyo cityscape" />
@@ -398,7 +405,7 @@ export default function HomePage() {
         <section className="sectionBlock" id="my-trips" style={{ scrollMarginTop: 88 }}>
           <div className="sectionHeader">
             <h2>My trips</h2>
-            <a className="more" onClick={() => showToast("View all trips — coming soon")} style={{ cursor: "pointer" }}>View all</a>
+            <a className="more">View all</a>
           </div>
           {tripsLoading ? (
             <p className="meta" style={{ padding: "16px 0" }}>Loading your trips…</p>

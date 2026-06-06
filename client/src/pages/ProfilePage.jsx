@@ -263,13 +263,23 @@ export default function ProfilePage() {
       return;
     }
   
+    if (file.size > 1024 * 1024) {
+      showToast("Please choose an image smaller than 1MB");
+      return;
+    }
+  
     const reader = new FileReader();
   
     reader.onload = () => {
       const imageDataUrl = reader.result;
-      setProfilePhoto(imageDataUrl);
-      localStorage.setItem("voyage_profile_photo", imageDataUrl);
-      showToast("Profile photo updated");
+  
+      try {
+        localStorage.setItem("voyage_profile_photo", imageDataUrl);
+        setProfilePhoto(imageDataUrl);
+        showToast("Profile photo updated");
+      } catch {
+        showToast("Image is too large to save. Please choose a smaller photo.");
+      }
     };
   
     reader.readAsDataURL(file);

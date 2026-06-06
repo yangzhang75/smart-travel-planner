@@ -12,6 +12,17 @@ const parseCost = (s) => {
   return parseFloat(cleaned) || 0;
 };
 
+const nextDateAfter = (lastDateStr) => {
+  if (!lastDateStr) return "";
+  const withYear = `${lastDateStr}, ${new Date().getFullYear()}`;
+  const d = new Date(withYear);
+  if (isNaN(d.getTime())) return "";
+  d.setDate(d.getDate() + 1);
+  return d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
+};
+
+const emptyStop = { time: "", title: "", type: "", description: "", duration: "", cost: "" };
+
 const loadingSteps = [
   "Researching destinations",
   "Analyzing your preferences",
@@ -64,6 +75,67 @@ export default function PlanWithAIPage() {
   const [apiError, setApiError] = useState(false);
   const [selectedDayIndex, setSelectedDayIndex] = useState(0);
   const [rightTab, setRightTab] = useState("map");
+  const [showAddStop, setShowAddStop] = useState(false);
+  const [newStop, setNewStop] = useState(emptyStop);
+  const [savingMutation, setSavingMutation] = useState(false);
+
+  const handleAddDay = async () => {
+    if (!tripData?._id) {
+      showToast("Wait for the trip to finish loading");
+      return;
+    }
+    const currentDays = tripData.days || [];
+    const dayNum = currentDays.length + 1;
+    const lastDate = currentDays[currentDays.length - 1]?.date || "";
+    const newDay = {
+      day: `Day ${dayNum}`,
+      date: nextDateAfter(lastDate),
+      theme: "New day",
+      stops: [],
+    };
+    setSavingMutation(true);
+    try {
+      const updated = await api.updateTrip(tripData._id, {
+        days: [...currentDays, newDay],
+      });
+      setTripData(updated);
+      setSelectedDayIndex(updated.days.length - 1);
+      showToast(`${newDay.day} added`);
+    } catch (err) {
+      showToast(err.message || "Failed to add day");
+    } finally {
+      setSavingMutation(false);
+    }
+  };
+
+  const handleSaveStop = async (e) => {
+    e.preventDefault();
+    if (!tripData?._id) {
+      showToast("Wait for the trip to finish loading");
+      return;
+    }
+    if (!newStop.title.trim()) {
+      showToast("Please enter a title");
+      return;
+    }
+    setSavingMutation(true);
+    try {
+      const updatedDays = (tripData.days || []).map((d, i) =>
+        i === safeDayIndex
+          ? { ...d, stops: [...(d.stops || []), { ...newStop }] }
+          : d
+      );
+      const updated = await api.updateTrip(tripData._id, { days: updatedDays });
+      setTripData(updated);
+      setShowAddStop(false);
+      setNewStop(emptyStop);
+      showToast("Stop added");
+    } catch (err) {
+      showToast(err.message || "Failed to add stop");
+    } finally {
+      setSavingMutation(false);
+    }
+  };
 
   const handleShare = async () => {
     const shareUrl = tripData?._id
@@ -256,7 +328,9 @@ export default function PlanWithAIPage() {
             </button>
           ))}
 
-          <button className="addDay" onClick={() => showToast("Add day — coming soon")}>+ Add day</button>
+          <button className="addDay" onClick={handleAddDay} disabled={savingMutation}>
+            {savingMutation ? "Adding…" : "+ Add day"}
+          </button>
         </aside>
 
         <main className="tripMain">
@@ -272,7 +346,7 @@ export default function PlanWithAIPage() {
               </p>
             </div>
 
-            <button onClick={() => showToast("Add stop — coming soon")}>+ Add a stop</button>
+            <button onClick={() => setShowAddStop(true)}>+ Add a stop</button>
           </div>
 
           <div className="stopList">
@@ -459,7 +533,143 @@ export default function PlanWithAIPage() {
           })()}
         </aside>
       </div>
+
+      {showAddStop && (
+        <div
+          onClick={() => !savingMutation && setShowAddStop(false)}
+          style={{
+            position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)",
+            display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000,
+          }}
+        >
+          <form
+            onClick={(e) => e.stopPropagation()}
+            onSubmit={handleSaveStop}
+            style={{
+              background: "white", borderRadius: 12, padding: 24,
+              width: "90%", maxWidth: 460, boxShadow: "0 12px 40px rgba(0,0,0,0.2)",
+              display: "flex", flexDirection: "column", gap: 12,
+            }}
+          >
+            <h2 style={{ margin: "0 0 4px 0", fontSize: 20 }}>Add a stop</h2>
+            <p style={{ margin: 0, fontSize: 13, color: "#666" }}>
+              Adding to {selectedDay?.day || "current day"}.
+            </p>
+
+            <label style={{ fontSize: 12, color: "#555" }}>
+              Time
+              <input
+                value={newStop.time}
+                onChange={(e) => setNewStop((s) => ({ ...s, time: e.target.value }))}
+                placeholder="e.g. 9:00"
+                style={inputStyle}
+              />
+            </label>
+
+            <label style={{ fontSize: 12, color: "#555" }}>
+              Title <span style={{ color: "#b00020" }}>*</span>
+              <input
+                value={newStop.title}
+                onChange={(e) => setNewStop((s) => ({ ...s, title: e.target.value }))}
+                placeholder="e.g. Tsukiji Outer Market"
+                required
+                autoFocus
+                style={inputStyle}
+              />
+            </label>
+
+            <label style={{ fontSize: 12, color: "#555" }}>
+              Type
+              <input
+                value={newStop.type}
+                onChange={(e) => setNewStop((s) => ({ ...s, type: e.target.value }))}
+                placeholder="e.g. Food & Market · Chuo"
+                style={inputStyle}
+              />
+            </label>
+
+            <label style={{ fontSize: 12, color: "#555" }}>
+              Description
+              <textarea
+                value={newStop.description}
+                onChange={(e) => setNewStop((s) => ({ ...s, description: e.target.value }))}
+                placeholder="What you'll do here..."
+                rows={3}
+                style={{ ...inputStyle, resize: "vertical", fontFamily: "inherit" }}
+              />
+            </label>
+
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+              <label style={{ fontSize: 12, color: "#555" }}>
+                Duration
+                <input
+                  value={newStop.duration}
+                  onChange={(e) => setNewStop((s) => ({ ...s, duration: e.target.value }))}
+                  placeholder="e.g. 2 hrs"
+                  style={inputStyle}
+                />
+              </label>
+              <label style={{ fontSize: 12, color: "#555" }}>
+                Cost
+                <input
+                  value={newStop.cost}
+                  onChange={(e) => setNewStop((s) => ({ ...s, cost: e.target.value }))}
+                  placeholder="e.g. $20"
+                  style={inputStyle}
+                />
+              </label>
+            </div>
+
+            <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginTop: 8 }}>
+              <button
+                type="button"
+                onClick={() => setShowAddStop(false)}
+                disabled={savingMutation}
+                style={btnSecondaryStyle}
+              >
+                Cancel
+              </button>
+              <button type="submit" disabled={savingMutation} style={btnPrimaryStyle}>
+                {savingMutation ? "Saving…" : "Save stop"}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
       {ToastNode}
     </div>
   );
 }
+
+const inputStyle = {
+  display: "block",
+  width: "100%",
+  marginTop: 4,
+  padding: "8px 10px",
+  fontSize: 14,
+  border: "1px solid #ddd",
+  borderRadius: 6,
+  boxSizing: "border-box",
+};
+
+const btnPrimaryStyle = {
+  padding: "8px 16px",
+  background: "#1a1a1a",
+  color: "white",
+  border: "none",
+  borderRadius: 6,
+  cursor: "pointer",
+  fontSize: 14,
+  fontWeight: 500,
+};
+
+const btnSecondaryStyle = {
+  padding: "8px 16px",
+  background: "white",
+  color: "#333",
+  border: "1px solid #ddd",
+  borderRadius: 6,
+  cursor: "pointer",
+  fontSize: 14,
+};

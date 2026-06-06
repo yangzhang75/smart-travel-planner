@@ -3,7 +3,14 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { api, auth } from "../utils/api";
 import TripMap from "../components/TripMap";
 import WeatherStrip from "../components/WeatherStrip";
+import { useToast } from "../components/Toast";
 import "../styles/planWithAI.css";
+
+const parseCost = (s) => {
+  if (!s) return 0;
+  const cleaned = String(s).replace(/[^\d.]/g, "");
+  return parseFloat(cleaned) || 0;
+};
 
 const loadingSteps = [
   "Researching destinations",
@@ -49,12 +56,26 @@ const sampleStops = [
 export default function PlanWithAIPage() {
   const navigate = useNavigate();
   const { state } = useLocation();
+  const { showToast, ToastNode } = useToast();
 
   const [loading, setLoading] = useState(true);
   const [activeStep, setActiveStep] = useState(0);
   const [tripData, setTripData] = useState(null);
   const [apiError, setApiError] = useState(false);
   const [selectedDayIndex, setSelectedDayIndex] = useState(0);
+  const [rightTab, setRightTab] = useState("map");
+
+  const handleShare = async () => {
+    const shareUrl = tripData?._id
+      ? `${window.location.origin}/trip/${tripData._id}`
+      : window.location.href;
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      showToast("Link copied!");
+    } catch {
+      showToast("Couldn't copy — clipboard blocked");
+    }
+  };
 
   const destination = state?.where || "Tokyo, Japan";
   const dates = state?.dateLabel || "Jul 12–19";
@@ -206,7 +227,7 @@ export default function PlanWithAIPage() {
 
         <div className="tripActions">
           <button onClick={() => window.location.reload()}>Regen</button>
-          <button>Share</button>
+          <button onClick={handleShare}>Share</button>
         </div>
       </header>
 
@@ -235,7 +256,7 @@ export default function PlanWithAIPage() {
             </button>
           ))}
 
-          <button className="addDay">+ Add day</button>
+          <button className="addDay" onClick={() => showToast("Add day — coming soon")}>+ Add day</button>
         </aside>
 
         <main className="tripMain">
@@ -251,7 +272,7 @@ export default function PlanWithAIPage() {
               </p>
             </div>
 
-            <button>+ Add a stop</button>
+            <button onClick={() => showToast("Add stop — coming soon")}>+ Add a stop</button>
           </div>
 
           <div className="stopList">
@@ -285,43 +306,160 @@ export default function PlanWithAIPage() {
 
         <aside className="tripRightPanel">
           <div className="tabs">
-            <button className="active">MAP</button>
-            <button>WEATHER</button>
-            <button>BUDGET</button>
+            <button
+              className={rightTab === "map" ? "active" : ""}
+              onClick={() => setRightTab("map")}
+            >MAP</button>
+            <button
+              className={rightTab === "weather" ? "active" : ""}
+              onClick={() => setRightTab("weather")}
+            >WEATHER</button>
+            <button
+              className={rightTab === "budget" ? "active" : ""}
+              onClick={() => setRightTab("budget")}
+            >BUDGET</button>
           </div>
 
-          <TripMap destination={destination} stops={stops} />
+          {rightTab === "map" && (
+            <>
+              <TripMap destination={destination} stops={stops} />
+              <WeatherStrip
+                destination={destination}
+                dateStart={state?.dateStart}
+                dateEnd={state?.dateEnd}
+              />
+            </>
+          )}
 
-          <WeatherStrip
-            destination={destination}
-            dateStart={state?.dateStart}
-            dateEnd={state?.dateEnd}
-          />
-
-          <div className="budgetBox">
-            <div>
-              <span>Day 1 total</span>
-              <strong>{tripData?.budget?.dayOneTotal || "$60"}</strong>
+          {rightTab === "weather" && (
+            <div style={{ padding: "16px 0" }}>
+              <h3 style={{ margin: "0 0 12px 0", fontSize: 14, color: "#666", textTransform: "uppercase", letterSpacing: 0.5 }}>
+                Forecast for {destination}
+              </h3>
+              <WeatherStrip
+                destination={destination}
+                dateStart={state?.dateStart}
+                dateEnd={state?.dateEnd}
+              />
+              <p style={{ marginTop: 16, fontSize: 12, color: "#888" }}>
+                Live data from Open-Meteo. Forecasts available up to 16 days out.
+              </p>
             </div>
+          )}
 
-            <div>
-              <span>Trip total so far</span>
-              <strong>{tripData?.budget?.tripTotal || "$60"}</strong>
-            </div>
+          {rightTab === "budget" && (() => {
+            const dayCosts = days.map((d) =>
+              (d.stops || []).reduce((sum, s) => sum + parseCost(s.cost), 0)
+            );
+            const totalSpent = dayCosts.reduce((a, b) => a + b, 0);
+            const budgetTotal =
+              parseCost(tripData?.budget?.total) || parseCost(state?.budgetLabel) || parseCost(budget) || 0;
+            const remaining = budgetTotal - totalSpent;
+            const pct = budgetTotal > 0 ? Math.min(100, Math.round((totalSpent / budgetTotal) * 100)) : 0;
+            const overBudget = remaining < 0;
+            return (
+              <div style={{ padding: "8px 0" }}>
+                <div
+                  style={{
+                    padding: 16,
+                    background: "#f7f5f0",
+                    borderRadius: 12,
+                    marginBottom: 16,
+                  }}
+                >
+                  <div style={{ fontSize: 11, color: "#888", letterSpacing: 0.5 }}>TOTAL BUDGET</div>
+                  <div style={{ fontSize: 32, fontWeight: 700, lineHeight: 1.1 }}>
+                    ${budgetTotal.toLocaleString()}
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between", marginTop: 14 }}>
+                    <div>
+                      <div style={{ fontSize: 11, color: "#888" }}>SPENT</div>
+                      <div style={{ fontSize: 20, fontWeight: 600 }}>
+                        ${totalSpent.toLocaleString()}
+                      </div>
+                    </div>
+                    <div style={{ textAlign: "right" }}>
+                      <div style={{ fontSize: 11, color: "#888" }}>
+                        {overBudget ? "OVER BUDGET" : "REMAINING"}
+                      </div>
+                      <div
+                        style={{
+                          fontSize: 20,
+                          fontWeight: 600,
+                          color: overBudget ? "#b00020" : "#2e7d32",
+                        }}
+                      >
+                        {overBudget ? "−" : ""}${Math.abs(remaining).toLocaleString()}
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    style={{
+                      marginTop: 14,
+                      height: 8,
+                      background: "#e5e1d6",
+                      borderRadius: 4,
+                      overflow: "hidden",
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: `${pct}%`,
+                        height: "100%",
+                        background: overBudget ? "#b00020" : "#5b8def",
+                        transition: "width 0.3s",
+                      }}
+                    />
+                  </div>
+                  <div style={{ fontSize: 11, color: "#888", marginTop: 6 }}>{pct}% of budget</div>
+                </div>
 
-            <div>
-              <span>Budget</span>
-              <strong>{tripData?.budget?.total || budget}</strong>
-            </div>
-
-            <div className="budgetTrack">
-              <div className="budgetFill" />
-            </div>
-
-            <small>{tripData?.budget?.remaining || "$2,190 remaining"}</small>
-          </div>
+                <div>
+                  <h4
+                    style={{
+                      fontSize: 11,
+                      color: "#888",
+                      letterSpacing: 0.5,
+                      margin: "0 0 8px 0",
+                    }}
+                  >
+                    PER DAY
+                  </h4>
+                  {days.map((d, i) => (
+                    <div
+                      key={d.day || i}
+                      onClick={() => setSelectedDayIndex(i)}
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        padding: "10px 4px",
+                        borderBottom: "1px solid #eee",
+                        cursor: "pointer",
+                        background: i === safeDayIndex ? "#f7f5f0" : "transparent",
+                        borderRadius: 6,
+                      }}
+                    >
+                      <div>
+                        <div style={{ fontWeight: 600, fontSize: 14 }}>
+                          {d.day || `Day ${i + 1}`}
+                        </div>
+                        {d.date && (
+                          <div style={{ fontSize: 11, color: "#888" }}>{d.date}</div>
+                        )}
+                      </div>
+                      <strong style={{ fontSize: 16 }}>
+                        ${dayCosts[i].toLocaleString()}
+                      </strong>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
         </aside>
       </div>
+      {ToastNode}
     </div>
   );
 }

@@ -376,7 +376,7 @@ export default function HomePage() {
         </section>
 
         <section className="sectionBlock">
-          <div className="sectionHeader"><h2>Coming up</h2></div>
+          <div className="sectionHeader"><h2>Suggested for you</h2></div>
           <article className="comingCard">
             <div className="comingImage">
               <img src={HOME_IMG.tokyo} alt="Tokyo cityscape" />
@@ -398,7 +398,7 @@ export default function HomePage() {
         <section className="sectionBlock" id="my-trips" style={{ scrollMarginTop: 88 }}>
           <div className="sectionHeader">
             <h2>My trips</h2>
-            <a className="more">View all</a>
+            <a className="more" onClick={() => showToast("View all trips — coming soon")} style={{ cursor: "pointer" }}>View all</a>
           </div>
           {tripsLoading ? (
             <p className="meta" style={{ padding: "16px 0" }}>Loading your trips…</p>

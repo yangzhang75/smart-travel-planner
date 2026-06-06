@@ -90,6 +90,7 @@ export default function TripOverviewPage() {
   const [lastSynced, setLastSynced] = useState(null);
   const [activeDay, setActiveDay] = useState(1);
   const [syncing, setSyncing] = useState(false);
+  const [isSavedPlace, setIsSavedPlace] = useState(false);
   const { showToast, ToastNode } = useToast();
 
   useEffect(() => {
@@ -223,6 +224,46 @@ export default function TripOverviewPage() {
     }
   };
 
+  const handleToggleSavePlace = () => {
+    if (!trip) return;
+  
+    const savedPlaces = JSON.parse(localStorage.getItem("voyage_saved_places") || "[]");
+    const tripId = trip._id || trip.id;
+  
+    if (isSavedPlace) {
+      const updatedPlaces = savedPlaces.filter((place) => place.id !== tripId);
+      localStorage.setItem("voyage_saved_places", JSON.stringify(updatedPlaces));
+      setIsSavedPlace(false);
+      showToast("Removed from saved places");
+      return;
+    }
+  
+    const newSavedPlace = {
+      id: tripId,
+      title: trip.title || "Saved Trip",
+      destination: trip.title || "Unknown place",
+      dateRange: trip.dateRange || "",
+      travelers: trip.travelers || 1,
+      budget: trip.vibe || "",
+      savedAt: new Date().toISOString(),
+    };
+  
+    const updatedPlaces = [newSavedPlace, ...savedPlaces];
+    localStorage.setItem("voyage_saved_places", JSON.stringify(updatedPlaces));
+    setIsSavedPlace(true);
+    showToast("Saved to places");
+  };
+
+  useEffect(() => {
+    if (!trip?._id && !trip?.id) return;
+  
+    const savedPlaces = JSON.parse(localStorage.getItem("voyage_saved_places") || "[]");
+    const tripId = trip._id || trip.id;
+  
+    const alreadySaved = savedPlaces.some((place) => place.id === tripId);
+    setIsSavedPlace(alreadySaved);
+  }, [trip]);
+
   const days = Array.isArray(trip?.days) ? trip.days : [];
 
   const activeDayData = useMemo(() => {
@@ -285,6 +326,16 @@ export default function TripOverviewPage() {
             voyage<span>.ai</span>
           </button>
           <div className="tripHeroActions">
+            <button
+              type="button"
+              className={`savePlaceButton ${isSavedPlace ? "is-saved" : ""}`}
+              onClick={handleToggleSavePlace}
+              aria-label={isSavedPlace ? "Remove from saved places" : "Save place"}
+            >
+              <span>{isSavedPlace ? "♥" : "♡"}</span>
+              {isSavedPlace ? "Saved place" : "Save place"}
+            </button>
+
             <span
               className={`offlinePill ${isOnline ? "" : "is-offline"}`}
               role="status"

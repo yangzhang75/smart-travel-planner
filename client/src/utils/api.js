@@ -57,6 +57,8 @@ async function request(path, { method = "GET", body } = {}) {
 export const api = {
   register: (body) => request("/auth/register", { method: "POST", body }),
   login: (body) => request("/auth/login", { method: "POST", body }),
+  me: () => request("/auth/me"),
+  updateMe: (body) => request("/auth/me", { method: "PUT", body }),
   listTrips: () => request("/trips"),
   getTrip: (id) => request(`/trips/${id}`),
   createTrip: (body) => request("/trips", { method: "POST", body }),

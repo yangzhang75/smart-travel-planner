@@ -6,7 +6,7 @@ import {
   UserNav, SuitcaseNav, TagNav, ArrowLeft,
 } from "../components/Icons";
 import { useToast } from "../components/Toast";
-import { auth } from "../utils/api";
+import { api, auth } from "../utils/api";
 import "../styles/profile.css";
 
 const initialsFromName = (name) => {
@@ -185,14 +185,94 @@ export default function ProfilePage() {
   const [searchParams] = useSearchParams();
   const { showToast, ToastNode } = useToast();
 
-  const user = auth.getUser();
-  const displayName = user?.name?.trim() || "Traveler";
-  const displayEmail = user?.email || "—";
-  const displayInitials = initialsFromName(user?.name);
+  const [me, setMe] = useState(() => auth.getUser());
+  const [trips, setTrips] = useState([]);
+  const [tripsLoading, setTripsLoading] = useState(true);
+  const [editName, setEditName] = useState(() => auth.getUser()?.name || "");
+  const [editEmail, setEditEmail] = useState(() => auth.getUser()?.email || "");
+  const [savingAccount, setSavingAccount] = useState(false);
+  const [accountError, setAccountError] = useState("");
+
+  const displayName = me?.name?.trim() || "Traveler";
+  const displayEmail = me?.email || "—";
+  const displayInitials = initialsFromName(me?.name);
+  const voyagerSince = me?.createdAt ? new Date(me.createdAt).getFullYear() : null;
 
   useEffect(() => {
-    if (!auth.isAuthed()) navigate("/signin");
+    if (!auth.isAuthed()) { navigate("/signin"); return; }
+    let cancelled = false;
+    (async () => {
+      try {
+        const [fresh, tripList] = await Promise.all([
+          api.me().catch(() => null),
+          api.listTrips().catch(() => []),
+        ]);
+        if (cancelled) return;
+        if (fresh) {
+          setMe(fresh);
+          auth.setUser(fresh);
+        }
+        setTrips(Array.isArray(tripList) ? tripList : []);
+      } finally {
+        if (!cancelled) setTripsLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
   }, [navigate]);
+
+  // Keep edit-form inputs synced when fresh user data arrives
+  useEffect(() => {
+    if (me?.name !== undefined) setEditName(me.name || "");
+    if (me?.email !== undefined) setEditEmail(me.email || "");
+  }, [me?.name, me?.email]);
+
+  const saveAccount = async () => {
+    const currentName = (me?.name || "").trim();
+    const currentEmail = (me?.email || "").trim().toLowerCase();
+    const newName = editName.trim();
+    const newEmail = editEmail.trim().toLowerCase();
+    const updates = {};
+    if (newName && newName !== currentName) updates.name = newName;
+    if (newEmail && newEmail !== currentEmail) updates.email = newEmail;
+    if (Object.keys(updates).length === 0) {
+      setAccountError("");
+      return;
+    }
+    setSavingAccount(true);
+    setAccountError("");
+    try {
+      const updated = await api.updateMe(updates);
+      setMe(updated);
+      auth.setUser(updated);
+      showToast("Account updated");
+    } catch (err) {
+      setAccountError(err.message || "Failed to update");
+    } finally {
+      setSavingAccount(false);
+    }
+  };
+
+  // Derived stats from real trips
+  const tripCountries = new Set(
+    trips
+      .map((t) => (t.where || "").split(",").map((s) => s.trim()).filter(Boolean).pop())
+      .filter(Boolean)
+  );
+  const tripCities = new Set(
+    trips
+      .map((t) => (t.where || "").split(",")[0]?.trim())
+      .filter(Boolean)
+  );
+  const totalDays = trips.reduce(
+    (sum, t) => sum + (Array.isArray(t.days) ? t.days.length : 0),
+    0
+  );
+  const travelStats = [
+    { key: "countries", icon: <GlobeIcon />, label: "Countries", value: tripCountries.size },
+    { key: "cities", icon: <MapPin />, label: "Cities", value: tripCities.size },
+    { key: "trips", icon: <SuitcaseNav />, label: "Total trips", value: trips.length },
+    { key: "days", icon: <Icon.calendar />, label: "Days traveled", value: totalDays },
+  ];
 
   // Lazy initializers — read localStorage once on mount.
   const [about, setAbout] = useState(() => loadProfile().about ?? "");
@@ -318,7 +398,7 @@ export default function ProfilePage() {
         <div className="navLinks">
           <button className="profIconBtn" aria-label="Back to home" onClick={() => navigate("/home")}><ArrowLeft /></button>
           <button className="profIconBtn" aria-label="Notifications"><Icon.bell /></button>
-          <div className="profNavAvatar">YL</div>
+          <div className="profNavAvatar">{displayInitials}</div>
         </div>
       </nav>
 
@@ -326,7 +406,7 @@ export default function ProfilePage() {
         {/* Hero */}
         <section className="profileHero">
           <div className="profHeroLeft">
-            <div className="profHeroAvatar" aria-hidden="true">YL</div>
+            <div className="profHeroAvatar" aria-hidden="true">{displayInitials}</div>
             <button
               type="button"
               className="profHeroPhotoBtn"
@@ -340,8 +420,8 @@ export default function ProfilePage() {
             <p className="profHeroTagline">Passionate traveler exploring the world</p>
             <div className="profHeroMeta">
               <span><span aria-hidden="true">📧</span> {displayEmail}</span>
-              <span><span aria-hidden="true">📍</span> Toronto, Canada</span>
-              <span><span aria-hidden="true">🗓️</span> Voyager since 2026</span>
+              {fields.live && <span><span aria-hidden="true">📍</span> {fields.live}</span>}
+              {voyagerSince && <span><span aria-hidden="true">🗓️</span> Voyager since {voyagerSince}</span>}
             </div>
           </div>
           <div className="profHeroRight">
@@ -358,7 +438,7 @@ export default function ProfilePage() {
 
         {/* Stats strip */}
         <section className="profStatsStrip" aria-label="Travel stats">
-          {TRAVEL_STATS.map((s) => (
+          {travelStats.map((s) => (
             <div className="profStatCell" key={s.key}>
               <div className="profStatIcon" aria-hidden="true">{s.icon}</div>
               <div className="profStatValue">{s.value}</div>
@@ -367,23 +447,15 @@ export default function ProfilePage() {
           ))}
         </section>
 
-        {/* Favorite places (hero — wider grid) */}
+        {/* Favorite places (hero) — empty until we have a backend for saved places */}
         <section className="favPlaces" aria-labelledby="favPlacesTitle">
           <div className="favPlacesHead">
             <h2 id="favPlacesTitle" className="favPlacesTitle">Favorite places</h2>
-            <p className="favPlacesSub">Tap a heart to save or remove.</p>
+            <p className="favPlacesSub">Save places you'd like to revisit.</p>
           </div>
-          <div className="favPlacesGrid">
-            {FAVORITE_PLACES.map((p) => (
-              <FavoriteCard
-                key={p.id}
-                place={p}
-                isFav={favorites.has(p.id)}
-                popping={poppingHeart === p.id}
-                onCardClick={() => showToast("Coming soon: place details")}
-                onToggle={() => toggleFavorite(p.id, p.name)}
-              />
-            ))}
+          <div className="emptyPanel">
+            <p>No favorite places yet.</p>
+            <p style={{ fontSize: 13 }}>Plan a trip first — saved destinations will appear here.</p>
           </div>
         </section>
 
@@ -416,7 +488,9 @@ export default function ProfilePage() {
                 <div className="identityBody">
                   <h2 className="identityName">{displayName}</h2>
                   <div className="identityBadges">
-                    <span className="idBadge"><span aria-hidden="true">🗓️</span> Voyager since 2026</span>
+                    {voyagerSince && (
+                      <span className="idBadge"><span aria-hidden="true">🗓️</span> Voyager since {voyagerSince}</span>
+                    )}
                     {fields.live && <span className="idBadge"><span aria-hidden="true">📍</span> {fields.live}</span>}
                     {fields.work && <span className="idBadge"><span aria-hidden="true">💼</span> {fields.work}</span>}
                   </div>
@@ -482,13 +556,8 @@ export default function ProfilePage() {
                   <h3 className="vsTitle">Where I&apos;ve been</h3>
                   <p className="vsSub">Stamps from your travels.</p>
                 </div>
-                <div className="stampsRow">
-                  {STAMPS.map((s, i) => (
-                    <div key={i} className="stamp">
-                      <div className={`stampShape ${s.shape}`} style={{ backgroundImage: `url(${s.img})` }} />
-                      <span className="stampLabel">{s.label}</span>
-                    </div>
-                  ))}
+                <div className="emptyTagsRow">
+                  <span className="emptyTags">No stamps yet — they'll appear here as you complete trips.</span>
                 </div>
               </section>
 
@@ -544,6 +613,60 @@ export default function ProfilePage() {
               <section className="profSection">
                 <div className="profSectionHead">
                   <div>
+                    <h2 className="profSectionTitle">Account info</h2>
+                    <p className="profSectionSub">Your name and email. Saves when you click away.</p>
+                  </div>
+                </div>
+                <div className="profFieldGrid">
+                  <div className="field">
+                    <label className="fieldLabel" htmlFor="edit-name">Name</label>
+                    <input
+                      id="edit-name"
+                      className="fieldInput"
+                      value={editName}
+                      onChange={(e) => setEditName(e.target.value)}
+                      onBlur={saveAccount}
+                      disabled={savingAccount}
+                      placeholder="Your name"
+                    />
+                  </div>
+                  <div className="field">
+                    <label className="fieldLabel" htmlFor="edit-email">Email</label>
+                    <input
+                      id="edit-email"
+                      type="email"
+                      className="fieldInput"
+                      value={editEmail}
+                      onChange={(e) => setEditEmail(e.target.value)}
+                      onBlur={saveAccount}
+                      disabled={savingAccount}
+                      placeholder="you@example.com"
+                    />
+                  </div>
+                </div>
+                {accountError && (
+                  <div
+                    role="alert"
+                    style={{
+                      color: "#b00020",
+                      background: "#fdecea",
+                      padding: "8px 12px",
+                      borderRadius: 6,
+                      fontSize: 14,
+                      marginTop: 8,
+                    }}
+                  >
+                    {accountError}
+                  </div>
+                )}
+                {savingAccount && (
+                  <p style={{ color: "#888", fontSize: 13, marginTop: 8 }}>Saving…</p>
+                )}
+              </section>
+
+              <section className="profSection">
+                <div className="profSectionHead">
+                  <div>
                     <h2 className="profSectionTitle">About me</h2>
                     <p className="profSectionSub">A short intro that travelers will see on your profile.</p>
                   </div>
@@ -592,7 +715,7 @@ export default function ProfilePage() {
                 <div className="profSectionHead">
                   <div>
                     <h2 className="profSectionTitle">Where I&apos;ve been</h2>
-                    <p className="profSectionSub">Pick the stamps you want others to see.</p>
+                    <p className="profSectionSub">Stamps appear here as you complete trips.</p>
                   </div>
                   <button
                     className={`toggle ${showStamps ? "on" : ""}`}
@@ -600,15 +723,9 @@ export default function ProfilePage() {
                     onClick={() => setShowStamps((v) => !v)}
                   />
                 </div>
-                <div className="stampsRow">
-                  {STAMPS.map((s, i) => (
-                    <div key={i} className="stamp">
-                      <div className={`stampShape ${s.shape}`} style={{ backgroundImage: `url(${s.img})` }} />
-                      <span className="stampLabel">{s.label}</span>
-                    </div>
-                  ))}
+                <div className="emptyTagsRow">
+                  <span className="emptyTags">No stamps yet.</span>
                 </div>
-                <button className="linkBtn">Edit travel stamps</button>
               </section>
 
               <section className="profSection">
@@ -640,26 +757,37 @@ export default function ProfilePage() {
                 <h2 className="panelTitle">Past trips</h2>
               </div>
               <p className="vsSub">Your completed adventures.</p>
-              {PAST_TRIPS.length > 0 ? (
+              {tripsLoading ? (
+                <div className="emptyPanel"><p>Loading your trips…</p></div>
+              ) : trips.length > 0 ? (
                 <div className="tripList">
-                  {PAST_TRIPS.map((t) => {
-                    const tripId = t.id || slugify(t.name);
-                    const open = () => navigate(`/trip/${tripId}`, { state: { trip: t } });
+                  {trips.map((t) => {
+                    const dayCount = Array.isArray(t.days) ? t.days.length : 0;
+                    const created = t.createdAt ? new Date(t.createdAt) : null;
+                    const meta = [
+                      created && created.toLocaleDateString("en-US", { month: "short", year: "numeric" }),
+                      dayCount > 0 && `${dayCount} day${dayCount === 1 ? "" : "s"}`,
+                    ].filter(Boolean).join(" · ");
+                    const open = () => navigate(`/trip/${t._id}`);
                     return (
                       <div
-                        key={tripId}
+                        key={t._id}
                         className="tripRow tripRowClickable"
                         role="button"
                         tabIndex={0}
                         onClick={open}
                         onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(); } }}
                       >
-                        <div className="tripThumb" style={{ backgroundImage: `url(${t.img})` }} />
-                        <div className="tripRowBody">
-                          <div className="tripRowName">{t.name}</div>
-                          <div className="tripRowMeta">{t.meta}</div>
+                        <div
+                          className="tripThumb"
+                          style={{ background: "linear-gradient(135deg, #5b8def, #b178d4)", display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontSize: 28, fontWeight: 600 }}
+                        >
+                          {(t.where || t.title || "?").trim().charAt(0).toUpperCase()}
                         </div>
-                        <span className="tripBadge">Completed</span>
+                        <div className="tripRowBody">
+                          <div className="tripRowName">{t.title || t.where || "Untitled trip"}</div>
+                          <div className="tripRowMeta">{meta}</div>
+                        </div>
                         <span className="tripChev">&rsaquo;</span>
                       </div>
                     );

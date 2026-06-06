@@ -3,6 +3,15 @@ import { useNavigate } from "react-router-dom";
 import { Icon } from "../components/Icons";
 import { useToast } from "../components/Toast";
 import SearchField, { fmtDateRange, fmtBudget, shiftMonth, addDays, isoFromDate, MonthView } from "../components/SearchField";
+import { api, auth } from "../utils/api";
+
+const TRIP_COLORS = ["#e57373", "#5b8def", "#b178d4", "#4caf7a", "#f0a020"];
+const colorForTrip = (id) => {
+  const s = String(id || "");
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
+  return TRIP_COLORS[h % TRIP_COLORS.length];
+};
 
 // ───── Homepage data ─────
 const HOME_IMG = {
@@ -23,6 +32,11 @@ const BUDGET_PILLS = [500, 1000, 2000, 3000, 5000];
 export default function HomePage() {
   const navigate = useNavigate();
   const { showToast, ToastNode } = useToast();
+  const user = auth.getUser();
+  const greetName = user?.name?.split(" ")[0] || "traveler";
+  const [trips, setTrips] = useState([]);
+  const [tripsLoading, setTripsLoading] = useState(true);
+  const [tripsError, setTripsError] = useState("");
   const [where, setWhere] = useState("");
   const [dateStart, setDateStart] = useState("");
   const [dateEnd, setDateEnd] = useState("");
@@ -108,6 +122,35 @@ export default function HomePage() {
     if (activeField === "where") whereInputRef.current?.focus();
     if (activeField === "wallet") budgetInputRef.current?.focus();
   }, [activeField]);
+
+  // Fetch trips on mount (redirect to signin if not authed)
+  useEffect(() => {
+    if (!auth.isAuthed()) {
+      navigate("/signin");
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      try {
+        setTripsLoading(true);
+        setTripsError("");
+        const data = await api.listTrips();
+        if (!cancelled) setTrips(Array.isArray(data) ? data : []);
+      } catch (err) {
+        if (cancelled) return;
+        if (err.status === 401) { navigate("/signin"); return; }
+        setTripsError(err.message || "Could not load trips");
+      } finally {
+        if (!cancelled) setTripsLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [navigate]);
+
+  const handleLogout = () => {
+    auth.logout();
+    navigate("/signin");
+  };
 
   const totalGuests = adults + children;
   const whoLabel = totalGuests > 0 ? `${totalGuests} guest${totalGuests === 1 ? "" : "s"}` : "";
@@ -231,7 +274,7 @@ export default function HomePage() {
                 <button
                   role="menuitem"
                   className="menuItem"
-                  onClick={() => navigate("/signin")}
+                  onClick={handleLogout}
                 >
                   <span className="menuIcon"><Icon.logout /></span>Log out
                 </button>
@@ -243,7 +286,7 @@ export default function HomePage() {
 
       <main className="dashboard">
         <section className="greeting">
-          <h1>Welcome back, Yoyo</h1>
+          <h1>Welcome back, {greetName}</h1>
           <div className="stats">
             <strong>3</strong> trips
             <span className="dot"></span>
@@ -355,49 +398,48 @@ export default function HomePage() {
             <h2>My trips</h2>
             <a className="more">View all</a>
           </div>
-          <div className="tripGrid">
-            <article
-              className="tripCard"
-              role="button"
-              tabIndex={0}
-              onClick={() => navigate("/trip/paris-weekend")}
-              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); navigate("/trip/paris-weekend"); } }}
-            >
-              <div className="cardImage">
-                <span className="tag">Upcoming</span>
-                <img src={HOME_IMG.paris} alt="Eiffel Tower in Paris" />
-              </div>
-              <div className="tripCardBody">
-                <h3>Paris Weekend</h3>
-                <p className="meta">France &middot; 3 days</p>
-              </div>
-            </article>
-            <article
-              className="tripCard"
-              role="button"
-              tabIndex={0}
-              onClick={() => navigate("/trip/seoul-food-tour")}
-              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); navigate("/trip/seoul-food-tour"); } }}
-            >
-              <div className="cardImage">
-                <span className="tag">Upcoming</span>
-                <img src={HOME_IMG.seoul} alt="Seoul cityscape" />
-              </div>
-              <div className="tripCardBody">
-                <h3>Seoul Food Tour</h3>
-                <p className="meta">Korea &middot; 5 days</p>
-              </div>
-            </article>
-            <article className="newTripCard">
-              <div className="newTripImage">
-                <div className="plusCircle"><Icon.plus /></div>
-              </div>
-              <div className="tripCardBody">
-                <h3>Start a new trip</h3>
-                <p className="meta">Let AI plan your next adventure</p>
-              </div>
-            </article>
-          </div>
+          {tripsLoading ? (
+            <p className="meta" style={{ padding: "16px 0" }}>Loading your trips…</p>
+          ) : tripsError ? (
+            <p role="alert" style={{ color: "#b00020", padding: "16px 0" }}>{tripsError}</p>
+          ) : (
+            <div className="tripGrid">
+              {trips.map((t) => {
+                const dayCount = Array.isArray(t.days) ? t.days.length : 0;
+                const letter = (t.where || t.title || "?").trim().charAt(0).toUpperCase();
+                return (
+                  <article
+                    key={t._id}
+                    className="tripCard"
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => navigate(`/trip/${t._id}`)}
+                    onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); navigate(`/trip/${t._id}`); } }}
+                  >
+                    <div className="cardImage" style={{ background: colorForTrip(t._id), display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      <span className="tag">Upcoming</span>
+                      <span style={{ color: "white", fontSize: 64, fontWeight: 600 }}>{letter}</span>
+                    </div>
+                    <div className="tripCardBody">
+                      <h3>{t.title || "Untitled trip"}</h3>
+                      <p className="meta">
+                        {t.where || "—"}{dayCount > 0 && ` · ${dayCount} day${dayCount === 1 ? "" : "s"}`}
+                      </p>
+                    </div>
+                  </article>
+                );
+              })}
+              <article className="newTripCard" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
+                <div className="newTripImage">
+                  <div className="plusCircle"><Icon.plus /></div>
+                </div>
+                <div className="tripCardBody">
+                  <h3>Start a new trip</h3>
+                  <p className="meta">Let AI plan your next adventure</p>
+                </div>
+              </article>
+            </div>
+          )}
         </section>
       </main>
       {ToastNode}

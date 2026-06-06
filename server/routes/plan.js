@@ -13,7 +13,7 @@ router.post("/", requireAuth, async (req, res) => {
     const { where, dateLabel, whoLabel, budgetLabel } = req.body;
 
     const response = await getClient().responses.create({
-      model: "gpt-5.2",
+      model: "gpt-4o-mini",
       input: `
 Create a travel itinerary as JSON only.
 

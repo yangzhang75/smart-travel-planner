@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { api, auth } from "../utils/api";
 import "../styles/planWithAI.css";
 
 const loadingSteps = [
@@ -81,22 +82,17 @@ export default function PlanWithAIPage() {
     }, 900);
 
     async function generateTrip() {
+      if (!auth.isAuthed()) {
+        navigate("/signin");
+        return;
+      }
       try {
-        const res = await fetch("http://localhost:5001/api/plan-trip", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            where: state?.where,
-            dateLabel: state?.dateLabel,
-            whoLabel: state?.whoLabel,
-            budgetLabel: state?.budgetLabel,
-          }),
+        const data = await api.planTrip({
+          where: state?.where,
+          dateLabel: state?.dateLabel,
+          whoLabel: state?.whoLabel,
+          budgetLabel: state?.budgetLabel,
         });
-        if (!res.ok) throw new Error(`API ${res.status}`);
-
-        const data = await res.json();
         setTripData(data);
         setApiError(false);
 
@@ -105,6 +101,10 @@ export default function PlanWithAIPage() {
         }, 4500);
       } catch (error) {
         console.error(error);
+        if (error.status === 401) {
+          navigate("/signin");
+          return;
+        }
         setApiError(true);
         // Fall back to sample data so the layout is never empty
         setTripData(null);

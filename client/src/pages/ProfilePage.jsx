@@ -6,7 +6,15 @@ import {
   UserNav, SuitcaseNav, TagNav, ArrowLeft,
 } from "../components/Icons";
 import { useToast } from "../components/Toast";
+import { auth } from "../utils/api";
 import "../styles/profile.css";
+
+const initialsFromName = (name) => {
+  if (!name) return "?";
+  const parts = name.trim().split(/\s+/);
+  if (parts.length >= 2) return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  return parts[0].slice(0, 2).toUpperCase();
+};
 
 // ───── Profile data ─────
 const PROFILE_FIELDS = [
@@ -177,6 +185,15 @@ export default function ProfilePage() {
   const [searchParams] = useSearchParams();
   const { showToast, ToastNode } = useToast();
 
+  const user = auth.getUser();
+  const displayName = user?.name?.trim() || "Traveler";
+  const displayEmail = user?.email || "—";
+  const displayInitials = initialsFromName(user?.name);
+
+  useEffect(() => {
+    if (!auth.isAuthed()) navigate("/signin");
+  }, [navigate]);
+
   // Lazy initializers — read localStorage once on mount.
   const [about, setAbout] = useState(() => loadProfile().about ?? "");
   const [aboutEditing, setAboutEditing] = useState(false);
@@ -319,10 +336,10 @@ export default function ProfilePage() {
             </button>
           </div>
           <div className="profHeroCenter">
-            <h1 className="profHeroName">Yoyo Lai</h1>
+            <h1 className="profHeroName">{displayName}</h1>
             <p className="profHeroTagline">Passionate traveler exploring the world</p>
             <div className="profHeroMeta">
-              <span><span aria-hidden="true">📧</span> yoyo@voyage.ai</span>
+              <span><span aria-hidden="true">📧</span> {displayEmail}</span>
               <span><span aria-hidden="true">📍</span> Toronto, Canada</span>
               <span><span aria-hidden="true">🗓️</span> Voyager since 2026</span>
             </div>
@@ -395,9 +412,9 @@ export default function ProfilePage() {
 
               {/* Identity card */}
               <section className="identityCard">
-                <div className="identityAvatar" aria-hidden="true">YL</div>
+                <div className="identityAvatar" aria-hidden="true">{displayInitials}</div>
                 <div className="identityBody">
-                  <h2 className="identityName">Yoyo Lai</h2>
+                  <h2 className="identityName">{displayName}</h2>
                   <div className="identityBadges">
                     <span className="idBadge"><span aria-hidden="true">🗓️</span> Voyager since 2026</span>
                     {fields.live && <span className="idBadge"><span aria-hidden="true">📍</span> {fields.live}</span>}

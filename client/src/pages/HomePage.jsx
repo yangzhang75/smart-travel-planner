@@ -51,6 +51,7 @@ export default function HomePage() {
   const [trips, setTrips] = useState([]);
   const [tripsLoading, setTripsLoading] = useState(true);
   const [tripsError, setTripsError] = useState("");
+  const [showAllTrips, setShowAllTrips] = useState(false);
   const [where, setWhere] = useState("");
   const [dateStart, setDateStart] = useState("");
   const [dateEnd, setDateEnd] = useState("");
@@ -319,15 +320,6 @@ export default function HomePage() {
       <main className="dashboard">
         <section className="greeting">
           <h1>Welcome back, {greetName}</h1>
-          <div className="stats">
-            <strong>3</strong> trips
-            <span className="dot"></span>
-            <strong>2</strong> countries
-            <span className="dot"></span>
-            <strong>12</strong> days
-            <span className="dot"></span>
-            <strong>$3,000</strong> budget
-          </div>
         </section>
 
         <section className="searchBar" aria-label="Plan a new trip" ref={searchBarRef}>
@@ -436,7 +428,11 @@ export default function HomePage() {
         <section className="sectionBlock" id="my-trips" style={{ scrollMarginTop: 88 }}>
           <div className="sectionHeader">
             <h2>My trips</h2>
-            <a className="more">View all</a>
+            {trips.length > 3 && (
+              <a className="more" style={{ cursor: "pointer" }} onClick={() => setShowAllTrips((v) => !v)}>
+                {showAllTrips ? "Show less" : "View all"}
+              </a>
+            )}
           </div>
           {tripsLoading ? (
             <p className="meta" style={{ padding: "16px 0" }}>Loading your trips…</p>
@@ -444,7 +440,7 @@ export default function HomePage() {
             <p role="alert" style={{ color: "#b00020", padding: "16px 0" }}>{tripsError}</p>
           ) : (
             <div className="tripGrid">
-              {trips.map((t) => {
+              {(showAllTrips ? trips : trips.slice(0, 3)).map((t) => {
                 const dayCount = Array.isArray(t.days) ? t.days.length : 0;
                 const letter = (t.where || t.title || "?").trim().charAt(0).toUpperCase();
                 return (

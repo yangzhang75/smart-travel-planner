@@ -433,7 +433,7 @@ export default function ProfilePage() {
     food.size > 0 && { label: "Food", value: [...food].join(" · ") },
   ].filter(Boolean);
 
-  const savedPlaces = FAVORITE_PLACES.filter((p) => favorites.has(p.id));
+
 
   return (
     <div className="app profilePage">
@@ -522,32 +522,6 @@ export default function ProfilePage() {
           ))}
         </section>
 
-        {/* Saved places hero */}
-        <section className="favPlaces" aria-labelledby="favPlacesTitle">
-          <div className="favPlacesHead">
-            <h2 id="favPlacesTitle" className="favPlacesTitle">Saved places</h2>
-            <p className="favPlacesSub">Places you saved from your trip detail pages.</p>
-          </div>
-
-          {savedPlaces.length === 0 ? (
-            <div className="emptyPanel">
-              <p>No saved places yet.</p>
-              <p style={{ fontSize: 13 }}>
-                Plan a trip first, then tap Save place on the trip detail page.
-              </p>
-            </div>
-          ) : (
-            <div className="savedPlacesList">
-              {savedPlaces.map((place) => (
-                <article className="savedPlaceCard" key={place.id}>
-                  <h3>{place.title}</h3>
-                  <p>{place.destination || place.title}</p>
-                  <small>{place.dateRange || "Saved trip"}</small>
-                </article>
-              ))}
-            </div>
-          )}
-        </section>
 
         <div className="profileShell">
           <aside className="profileNav">
@@ -854,37 +828,40 @@ export default function ProfilePage() {
               </div>
               <p className="vsSub">Places you've hearted to revisit later.</p>
               {savedPlaces.length > 0 ? (
-                <div className="favPlacesGrid">
-                  {savedPlaces.map((p) => (
-                    <FavoriteCard
-                      key={p.id}
-                      place={p}
-                      isFav={true}
-                      popping={poppingHeart === p.id}
-                      onCardClick={() => showToast("Coming soon: place details")}
-                      onToggle={() => toggleFavorite(p.id, p.name)}
-                    />
-                  ))}
-                </div>
-              ) : (
-                {savedPlaces.length === 0 ? (
-                  <div className="emptyPanel">
-                    <p>No saved places yet.</p>
-                    <span>Tap Save place on a trip detail page to save it here.</span>
-                  </div>
-                ) : (
-                  <div className="savedPlacesList">
-                    {savedPlaces.map((place) => (
-                      <article className="savedPlaceCard" key={place.id}>
-                        <div>
-                          <h3>{place.title}</h3>
-                          <p>{place.destination || place.title}</p>
-                          <small>{place.dateRange || "Saved trip"}</small>
+                <div className="tripGrid">
+                  {savedPlaces.map((p) => {
+                    const letter = (p.destination || p.title || "?").trim().charAt(0).toUpperCase();
+                    const id = p.id || "";
+                    let h = 0;
+                    for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0;
+                    const COLORS = ["#e57373", "#5b8def", "#b178d4", "#4caf7a", "#f0a020"];
+                    const bg = COLORS[h % COLORS.length];
+                    return (
+                      <article
+                        key={p.id}
+                        className="tripCard"
+                        role="button"
+                        tabIndex={0}
+                        onClick={() => navigate(`/trip/${p.id}`)}
+                        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); navigate(`/trip/${p.id}`); } }}
+                      >
+                        <div className="cardImage" style={{ background: bg, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                          <span className="tag">Saved</span>
+                          <span style={{ color: "white", fontSize: 64, fontWeight: 600 }}>{letter}</span>
+                        </div>
+                        <div className="tripCardBody">
+                          <h3>{p.title || "Saved trip"}</h3>
+                          <p className="meta">{p.dateRange || p.destination || ""}</p>
                         </div>
                       </article>
-                    ))}
-                  </div>
-                )}
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="emptyPanel">
+                  <p>No saved places yet.</p>
+                  <span>Tap Save place on a trip detail page to save it here.</span>
+                </div>
               )}
             </div>
           )}

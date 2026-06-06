@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { api, auth } from "../utils/api";
+import TripMap from "../components/TripMap";
+import WeatherStrip from "../components/WeatherStrip";
 import "../styles/planWithAI.css";
 
 const loadingSteps = [
@@ -288,30 +290,13 @@ export default function PlanWithAIPage() {
             <button>BUDGET</button>
           </div>
 
-          <div className="mapBox">[ INTERACTIVE MAP ]</div>
+          <TripMap destination={destination} stops={stops} />
 
-          <div className="weatherRow">
-            <div>
-              <span>MON</span>
-              <div className="weatherIcon" />
-              72°
-            </div>
-            <div>
-              <span>TUE</span>
-              <div className="weatherIcon" />
-              68°
-            </div>
-            <div>
-              <span>WED</span>
-              <div className="weatherIcon" />
-              74°
-            </div>
-            <div>
-              <span>THU</span>
-              <div className="weatherIcon" />
-              70°
-            </div>
-          </div>
+          <WeatherStrip
+            destination={destination}
+            dateStart={state?.dateStart}
+            dateEnd={state?.dateEnd}
+          />
 
           <div className="budgetBox">
             <div>

@@ -281,7 +281,7 @@ export default function ProfilePage() {
   const [showStamps, setShowStamps] = useState(() => loadProfile().showStamps ?? true);
   const [interests, setInterests] = useState(() => {
     const saved = loadProfile().interests;
-    return new Set(Array.isArray(saved) ? saved : ["Food & Dining", "Photography"]);
+    return new Set(Array.isArray(saved) ? saved : []);
   });
   const [nav, setNav] = useState(() => {
     const t = searchParams.get("tab");
@@ -291,18 +291,18 @@ export default function ProfilePage() {
 
   const [favorites, setFavorites] = useState(() => {
     const saved = loadProfile().favorites;
-    return new Set(Array.isArray(saved) ? saved : FAVORITE_PLACES.map((p) => p.id));
+    return new Set(Array.isArray(saved) ? saved : []);
   });
   const [poppingHeart, setPoppingHeart] = useState(null);
-  const [adventure, setAdventure] = useState(() => loadProfile().adventure ?? "Medium");
-  const [budgetStyle, setBudgetStyle] = useState(() => loadProfile().budgetStyle ?? "Mid-range");
+  const [adventure, setAdventure] = useState(() => loadProfile().adventure ?? "");
+  const [budgetStyle, setBudgetStyle] = useState(() => loadProfile().budgetStyle ?? "");
   const [accommodation, setAccommodation] = useState(() => {
     const saved = loadProfile().accommodation;
-    return new Set(Array.isArray(saved) ? saved : ["Hotel", "Airbnb"]);
+    return new Set(Array.isArray(saved) ? saved : []);
   });
   const [food, setFood] = useState(() => {
     const saved = loadProfile().food;
-    return new Set(Array.isArray(saved) ? saved : ["Any"]);
+    return new Set(Array.isArray(saved) ? saved : []);
   });
 
   // Sync nav to URL ?tab= changes

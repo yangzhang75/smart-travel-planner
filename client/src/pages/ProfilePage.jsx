@@ -68,7 +68,6 @@ const FOOD_PREFS = ["Any", "Vegetarian", "Vegan", "Halal", "Kosher"];
 
 const NAV_ITEMS = [
   { key: "about", label: "About me", IconComp: UserNav },
-  { key: "past", label: "Past trips", IconComp: SuitcaseNav },
   { key: "saved", label: "Saved Places", IconComp: HeartIcon },
   { key: "interests", label: "Travel interests", IconComp: TagNav },
   { key: "preferences", label: "Travel preferences", IconComp: Compass },
@@ -187,6 +186,7 @@ export default function ProfilePage() {
 
   const [me, setMe] = useState(() => auth.getUser());
   const [trips, setTrips] = useState([]);
+  const [savedPlaces, setSavedPlaces] = useState([]);
   const photoInputRef = useRef(null);
   const [profilePhoto, setProfilePhoto] = useState(() => {return localStorage.getItem("voyage_profile_photo") || "";});
   const [tripsLoading, setTripsLoading] = useState(true);
@@ -228,6 +228,24 @@ export default function ProfilePage() {
     if (me?.email !== undefined) setEditEmail(me.email || "");
   }, [me?.name, me?.email]);
 
+  useEffect(() => {
+    const loadSavedPlaces = () => {
+      const storedSavedPlaces = JSON.parse(
+        localStorage.getItem("voyage_saved_places") || "[]"
+      );
+  
+      setSavedPlaces(storedSavedPlaces);
+    };
+  
+    loadSavedPlaces();
+  
+    window.addEventListener("focus", loadSavedPlaces);
+  
+    return () => {
+      window.removeEventListener("focus", loadSavedPlaces);
+    };
+  }, []);
+  
   const saveAccount = async () => {
     const currentName = (me?.name || "").trim();
     const currentEmail = (me?.email || "").trim().toLowerCase();
@@ -504,16 +522,31 @@ export default function ProfilePage() {
           ))}
         </section>
 
-        {/* Favorite places (hero) — empty until we have a backend for saved places */}
+        {/* Saved places hero */}
         <section className="favPlaces" aria-labelledby="favPlacesTitle">
           <div className="favPlacesHead">
-            <h2 id="favPlacesTitle" className="favPlacesTitle">Favorite places</h2>
-            <p className="favPlacesSub">Save places you'd like to revisit.</p>
+            <h2 id="favPlacesTitle" className="favPlacesTitle">Saved places</h2>
+            <p className="favPlacesSub">Places you saved from your trip detail pages.</p>
           </div>
-          <div className="emptyPanel">
-            <p>No favorite places yet.</p>
-            <p style={{ fontSize: 13 }}>Plan a trip first — saved destinations will appear here.</p>
-          </div>
+
+          {savedPlaces.length === 0 ? (
+            <div className="emptyPanel">
+              <p>No saved places yet.</p>
+              <p style={{ fontSize: 13 }}>
+                Plan a trip first, then tap Save place on the trip detail page.
+              </p>
+            </div>
+          ) : (
+            <div className="savedPlacesList">
+              {savedPlaces.map((place) => (
+                <article className="savedPlaceCard" key={place.id}>
+                  <h3>{place.title}</h3>
+                  <p>{place.destination || place.title}</p>
+                  <small>{place.dateRange || "Saved trip"}</small>
+                </article>
+              ))}
+            </div>
+          )}
         </section>
 
         <div className="profileShell">
@@ -813,60 +846,6 @@ export default function ProfilePage() {
             </div>
           )}
 
-          {/* Past trips */}
-          {nav === "past" && (
-            <div className="contentPanel">
-              <div className="panelHead">
-                <h2 className="panelTitle">Past trips</h2>
-              </div>
-              <p className="vsSub">Your completed adventures.</p>
-              {tripsLoading ? (
-                <div className="emptyPanel"><p>Loading your trips…</p></div>
-              ) : trips.length > 0 ? (
-                <div className="tripList">
-                  {trips.map((t) => {
-                    const dayCount = Array.isArray(t.days) ? t.days.length : 0;
-                    const created = t.createdAt ? new Date(t.createdAt) : null;
-                    const meta = [
-                      created && created.toLocaleDateString("en-US", { month: "short", year: "numeric" }),
-                      dayCount > 0 && `${dayCount} day${dayCount === 1 ? "" : "s"}`,
-                    ].filter(Boolean).join(" · ");
-                    const open = () => navigate(`/trip/${t._id}`);
-                    return (
-                      <div
-                        key={t._id}
-                        className="tripRow tripRowClickable"
-                        role="button"
-                        tabIndex={0}
-                        onClick={open}
-                        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(); } }}
-                      >
-                        <div
-                          className="tripThumb"
-                          style={{ background: "linear-gradient(135deg, #5b8def, #b178d4)", display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontSize: 28, fontWeight: 600 }}
-                        >
-                          {(t.where || t.title || "?").trim().charAt(0).toUpperCase()}
-                        </div>
-                        <div className="tripRowBody">
-                          <div className="tripRowName">{t.title || t.where || "Untitled trip"}</div>
-                          <div className="tripRowMeta">{meta}</div>
-                        </div>
-                        <span className="tripChev">&rsaquo;</span>
-                      </div>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div className="emptyPanel">
-                  <p>No trips yet.</p>
-                  <button className="addCtaBtn" onClick={() => navigate("/home")}>
-                    <Icon.plus /> Plan your first trip
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
-
           {/* Saved Places */}
           {nav === "saved" && (
             <div className="contentPanel">
@@ -888,10 +867,24 @@ export default function ProfilePage() {
                   ))}
                 </div>
               ) : (
-                <div className="emptyPanel">
-                  <p>No saved places yet.</p>
-                  <p style={{ fontSize: 13 }}>Tap the heart on a place to save it here.</p>
-                </div>
+                {savedPlaces.length === 0 ? (
+                  <div className="emptyPanel">
+                    <p>No saved places yet.</p>
+                    <span>Tap Save place on a trip detail page to save it here.</span>
+                  </div>
+                ) : (
+                  <div className="savedPlacesList">
+                    {savedPlaces.map((place) => (
+                      <article className="savedPlaceCard" key={place.id}>
+                        <div>
+                          <h3>{place.title}</h3>
+                          <p>{place.destination || place.title}</p>
+                          <small>{place.dateRange || "Saved trip"}</small>
+                        </div>
+                      </article>
+                    ))}
+                  </div>
+                )}
               )}
             </div>
           )}

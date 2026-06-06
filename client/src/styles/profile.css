@@ -1043,3 +1043,32 @@
   border-radius: inherit;
   display: block;
 }
+
+.savedPlacesList {
+  display: grid;
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.savedPlaceCard {
+  border: 1px solid var(--rule);
+  border-radius: 18px;
+  padding: 18px 20px;
+  background: #fff;
+}
+
+.savedPlaceCard h3 {
+  margin: 0 0 6px;
+  font-size: 18px;
+  color: var(--ink);
+}
+
+.savedPlaceCard p {
+  margin: 0 0 6px;
+  color: var(--muted);
+}
+
+.savedPlaceCard small {
+  color: var(--green);
+  font-weight: 700;
+}
